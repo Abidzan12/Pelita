@@ -1,3 +1,4 @@
+import { ChatbotWidget } from "@/components/ChatbotWidget";
 import { QuickExitButton } from "@/components/QuickExitButton";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -21,6 +22,7 @@ export default function PublicLayout({
         <TicketReceiptProvider>{children}</TicketReceiptProvider>
       </main>
       <SiteFooter />
+      <ChatbotWidget />
       <QuickExitButton />
     </div>
   );

@@ -56,6 +56,24 @@ export default async function ProtectedAdminLayout({
                   Laporan
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/admin/konseling"
+                  className="inline-flex min-h-11 items-center rounded-md px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  Konseling
+                </Link>
+              </li>
+              {admin.role !== "KONSELOR" ? (
+                <li>
+                  <Link
+                    href="/admin/statistik"
+                    className="inline-flex min-h-11 items-center rounded-md px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    Statistik
+                  </Link>
+                </li>
+              ) : null}
             </ul>
           </nav>
 

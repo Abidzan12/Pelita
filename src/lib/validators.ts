@@ -41,6 +41,16 @@ export const ticketMessageSchema = z.object({
     .max(2000, "Pesan maksimal 2000 karakter."),
 });
 
+export const counselingBookingSchema = z.object({
+  slotId: z.string().trim().min(1).max(64),
+  aliasName: z.string().trim().max(50, "Nama panggilan maksimal 50 karakter.").optional(),
+  contact: z.string().trim().max(200, "Kontak maksimal 200 karakter.").optional(),
+});
+
+export const counselingLookupSchema = z.object({
+  bookingCode: z.string().trim().min(1).max(64),
+});
+
 export type CreateReportInput = z.infer<typeof createReportSchema>;
 
 export function zodFieldErrors(error: z.ZodError): { field: string; message: string }[] {

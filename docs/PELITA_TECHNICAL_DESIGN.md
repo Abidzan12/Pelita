@@ -471,9 +471,9 @@ Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 - [x] Test RBAC: konselor tidak bisa membuka laporan yang tidak ditugaskan.
 
 ### Fase 3 — Layanan Pendukung (P1) (18–21 Nov)
-- [ ] Konseling: slot (admin) + booking (publik) + kode booking (FR-06).
-- [ ] Chatbot berbasis aturan + `faq.json` + deteksi kata kunci darurat (FR-07).
-- [ ] Statistik semester + ekspor CSV agregat (FR-08).
+- [x] Konseling: slot (admin) + booking (publik) + kode booking (FR-06).
+- [x] Chatbot berbasis aturan + `faq.json` + deteksi kata kunci darurat (FR-07).
+- [x] Statistik semester + ekspor CSV agregat (FR-08).
 
 ### Fase 4 — Edukasi & Peta (P2) (22–24 Nov)
 - [ ] CRUD artikel admin + halaman publik + seed 4 artikel (FR-09).

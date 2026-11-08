@@ -35,3 +35,21 @@ export const reportListQuerySchema = z.object({
     .optional(),
   q: z.string().trim().max(100).optional(),
 });
+
+const dateTimeString = z
+  .string()
+  .trim()
+  .refine((value) => !Number.isNaN(Date.parse(value)), "Tanggal tidak valid.");
+
+export const counselingSlotCreateSchema = z.object({
+  startsAt: dateTimeString,
+  endsAt: dateTimeString,
+  mode: z.enum(["ONLINE", "OFFLINE"]),
+  counselorId: z.string().trim().min(1).optional(),
+});
+
+export const counselingSlotUpdateSchema = z.object({
+  startsAt: dateTimeString,
+  endsAt: dateTimeString,
+  mode: z.enum(["ONLINE", "OFFLINE"]),
+});

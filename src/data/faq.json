@@ -1,0 +1,86 @@
+[
+  {
+    "id": "cara-lapor",
+    "question": "Bagaimana cara melapor?",
+    "keywords": ["cara lapor", "cara melapor", "buat laporan", "melapor", "lapor"],
+    "answer": "Buka halaman Lapor. Kamu hanya perlu mengisi kronologi; tanggal, lokasi, dan bukti bersifat opsional. Setelah terkirim, kamu akan menerima tiket. Simpan tiket itu karena hanya ditampilkan sekali."
+  },
+  {
+    "id": "apa-itu-tiket",
+    "question": "Apa itu tiket?",
+    "keywords": ["tiket", "kode laporan", "unique ticket", "kode tiket"],
+    "answer": "Tiket adalah kunci untuk membuka laporanmu. Sistem hanya menyimpan hash tiket, bukan tiket asli. Gunakan tiket di halaman Cek status untuk melihat perkembangan dan chat dengan petugas."
+  },
+  {
+    "id": "tiket-hilang",
+    "question": "Tiket saya hilang, apa yang bisa dilakukan?",
+    "keywords": ["tiket hilang", "lupa tiket", "kehilangan tiket", "tiket tidak bisa"],
+    "answer": "Tiket tidak dapat dipulihkan karena tidak disimpan dalam bentuk asli. Jika kamu masih punya salinannya, buka halaman Cek status. Jika benar-benar hilang, kamu bisa membuat laporan baru atau menghubungi kanal resmi kampus."
+  },
+  {
+    "id": "anonim",
+    "question": "Apakah laporan saya benar-benar anonim?",
+    "keywords": ["anonim", "identitas", "nama saya", "terlacak", "ip", "privasi"],
+    "answer": "Pelita tidak meminta akun, nama, email, atau nomor telepon pelapor. Aplikasi tidak menyimpan IP atau user-agent. Isi laporan dienkripsi di server. Petugas berwenang tetap dapat membaca laporan, jadi ini bukan enkripsi ujung ke ujung."
+  },
+  {
+    "id": "bukti",
+    "question": "Bukti apa yang bisa diunggah?",
+    "keywords": ["bukti", "foto", "screenshot", "unggah", "file", "exif"],
+    "answer": "Kamu bisa mengunggah JPG, PNG, WebP, PDF, MP3, atau MP4, maksimal 10 MB per berkas dan 5 berkas per laporan. Foto diproses ulang sehingga metadata EXIF/GPS dihapus. Metadata PDF, audio, dan video tidak dapat dihapus otomatis."
+  },
+  {
+    "id": "konseling",
+    "question": "Bagaimana cara memesan konseling?",
+    "keywords": ["konseling", "ulbk", "psikolog", "curhat", "pendampingan"],
+    "answer": "Buka halaman Konseling, pilih slot yang tersedia, lalu isi nama panggilan dan kontak bila kamu mau. Kamu akan menerima kode booking. Kode itu juga hanya ditampilkan sekali, jadi simpan baik-baik."
+  },
+  {
+    "id": "hak-korban",
+    "question": "Apa hak saya sebagai korban?",
+    "keywords": ["hak", "hukum", "pidana", "polisi", "proses hukum", "pendampingan hukum"],
+    "answer": "Kamu berhak mendapat perlindungan, informasi, dan pendampingan. Kamu juga berhak memilih kapan dan bagaimana melanjutkan proses hukum. Untuk prosedur resmi, hubungi Satgas PPKS atau layanan hukum melalui kanal resmi kampus."
+  },
+  {
+    "id": "kekerasan-seksual",
+    "question": "Apa yang termasuk kekerasan seksual?",
+    "keywords": ["kekerasan seksual", "pelecehan", "definisi", "bentuk"],
+    "answer": "Kekerasan seksual adalah tindakan bernuansa seksual tanpa persetujuan, termasuk ucapan, sentuhan, paksaan, penyebaran konten intim, dan ancaman. Persetujuan harus diberikan dengan sadar dan bisa dicabut. Ini bukan salah korban."
+  },
+  {
+    "id": "perundungan",
+    "question": "Apa yang bisa dilakukan jika mengalami perundungan?",
+    "keywords": ["perundungan", "bully", "bullying", "diejek", "dikucilkan"],
+    "answer": "Perundungan bisa terjadi secara langsung maupun daring. Simpan bukti bila aman, catat kejadiannya, dan ceritakan kepada orang yang kamu percaya. Kamu bisa melapor lewat Pelita atau menghubungi kanal resmi kampus."
+  },
+  {
+    "id": "quick-exit",
+    "question": "Bagaimana cara keluar cepat dari situs ini?",
+    "keywords": ["keluar cepat", "quick exit", "tombol esc", "riwayat", "tutup cepat"],
+    "answer": "Klik tombol Keluar cepat di kanan bawah, atau tekan tombol Esc dua kali. Halaman akan dibersihkan lalu dialihkan ke Google. Setelah itu, pertimbangkan menghapus riwayat browser dan memakai mode penyamaran."
+  },
+  {
+    "id": "kontak-darurat",
+    "question": "Di mana saya bisa menemukan kontak darurat?",
+    "keywords": ["kontak darurat", "nomor darurat", "layanan darurat", "bantuan segera"],
+    "answer": "Buka halaman Kontak darurat. Pelita tidak mengarang nomor layanan; kanal resmi di halaman itu diisi oleh tim kampus. Jika kamu dalam bahaya sekarang, hubungi layanan darurat setempat atau orang yang kamu percaya."
+  },
+  {
+    "id": "penyimpanan-data",
+    "question": "Bagaimana data saya disimpan?",
+    "keywords": ["data", "disimpan", "enkripsi", "aman", "server"],
+    "answer": "Deskripsi laporan, pesan, kontak konseling, dan isi bukti dienkripsi dengan AES-256-GCM sebelum disimpan. Tiket laporan disimpan sebagai hash. Tetap ingat bahwa ini enkripsi di sisi server, bukan enkripsi ujung ke ujung."
+  },
+  {
+    "id": "melapor-untuk-orang-lain",
+    "question": "Bisakah saya melapor untuk orang lain?",
+    "keywords": ["saksi", "teman", "orang lain", "melapor untuk"],
+    "answer": "Bisa. Saat membuat laporan, pilih peran Saksi. Ceritakan apa yang kamu lihat atau ketahui. Tetap jaga privasi korban: jangan menyebarkan identitas atau bukti tanpa izin."
+  },
+  {
+    "id": "status-laporan",
+    "question": "Bagaimana cara melihat status laporan?",
+    "keywords": ["status", "perkembangan", "chat", "balasan", "tindak lanjut"],
+    "answer": "Buka halaman Cek status, masukkan tiketmu, lalu lihat tahap penanganan dan percakapan. Pesan baru muncul otomatis saat halaman terbuka. Kamu juga bisa menambahkan bukti dari halaman itu."
+  }
+]

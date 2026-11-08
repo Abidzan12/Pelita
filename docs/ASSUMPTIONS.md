@@ -57,3 +57,33 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 - Konselor hanya dapat melihat laporan yang ditugaskan kepadanya dan tidak dapat
   mengunduh isi bukti atau mengubah status. Batasan ini dicek di server, bukan hanya
   disembunyikan di UI.
+
+## Konseling
+
+- Kode booking memakai format `BKG-XXXX-XXXX-XXXX-XXXX` dan disimpan hanya sebagai
+  HMAC. Domain HMAC dibedakan dari tiket (`booking:` vs tiket), walaupun memakai
+  `TICKET_PEPPER` yang sama.
+- Kontak konseling bersifat opsional. Bila diisi, kontak dienkripsi sebelum disimpan
+  dan hanya ditampilkan kepada Konselor/Super Admin di panel. Pengisian kontak
+  dianggap sebagai persetujuan untuk dihubungi.
+- Pembatalan/penjadwalan ulang booking belum tersedia pada versi ini. Slot yang sudah
+  dipesan tidak dapat diubah atau dihapus.
+- Super Admin boleh membuat slot untuk Konselor aktif; Konselor hanya mengelola
+  slotnya sendiri.
+
+## Chatbot
+
+- Chatbot berbasis aturan dan FAQ lokal, bukan LLM. Tidak ada pesan yang disimpan.
+- Daftar kata kunci bahaya mencakup ungkapan seperti "bunuh diri", "disiksa",
+  "dipukul", "diancam", "diperkosa", dan "butuh bantuan sekarang". Bila terdeteksi,
+  chatbot menampilkan arahan bantuan segera dan tautan ke halaman Kontak Darurat,
+  tanpa mengarang nomor atau alamat.
+
+## Statistik
+
+- Format semester adalah `YYYY-1` (Januari–Juni) atau `YYYY-2` (Juli–Desember).
+- Statistik hanya memuat agregat: jumlah per status/kategori/bulan dan rata-rata
+  waktu respons. Rata-rata dihitung dari selisih pesan admin pertama dan waktu
+  laporan dibuat, hanya untuk laporan yang sudah dibalas.
+- Halaman dan API statistik hanya untuk Satgas dan Super Admin. Ekspor CSV dicatat
+  di audit log.

@@ -1,8 +1,12 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import {
+  generateBookingCode,
   generateTicket,
+  hashBookingCode,
   hashTicket,
+  isValidBookingCodeFormat,
   isValidTicketFormat,
+  normalizeBookingCode,
   normalizeTicket,
 } from "./ticket";
 
@@ -64,5 +68,21 @@ describe("hashTicket", () => {
       "TICKET_PEPPER belum diatur.",
     );
     process.env.TICKET_PEPPER = saved;
+  });
+});
+
+describe("kode booking konseling", () => {
+  it("menghasilkan format BKG-XXXX-XXXX-XXXX-XXXX", () => {
+    expect(generateBookingCode()).toMatch(
+      /^BKG-[0-9A-HJKMNP-TV-Z]{4}(-[0-9A-HJKMNP-TV-Z]{4}){3}$/,
+    );
+    expect(isValidBookingCodeFormat(generateBookingCode())).toBe(true);
+  });
+
+  it("menormalisasi dan memberi hash berbeda dari hash tiket", () => {
+    const code = generateBookingCode();
+    expect(normalizeBookingCode(code.toLowerCase())).toBe(normalizeBookingCode(code));
+    expect(hashBookingCode(code)).toHaveLength(64);
+    expect(hashBookingCode(code)).not.toBe(hashTicket(code));
   });
 });
