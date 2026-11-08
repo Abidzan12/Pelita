@@ -9,9 +9,9 @@ Keputusan yang tidak diatur di sana dicatat di [`docs/ASSUMPTIONS.md`](docs/ASSU
 
 ## Status
 
-Fase 0 (setup) selesai: Next.js App Router, Prisma + PostgreSQL, modul enkripsi dan
-tiket, header keamanan, layout publik, Quick Exit, landing page, dan halaman kontak
-darurat. Fitur pelaporan (Fase 1) sedang dikerjakan.
+Fase 0 (setup) dan Fase 1 (inti pelaporan P0) selesai: laporan anonim + tiket,
+pipeline bukti terenkripsi, cek status, chat dua arah, dan polling. Panel admin
+(Fase 2) sedang dikerjakan.
 
 ## Stack
 

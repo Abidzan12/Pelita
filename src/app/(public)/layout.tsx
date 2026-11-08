@@ -1,6 +1,7 @@
 import { QuickExitButton } from "@/components/QuickExitButton";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TicketReceiptProvider } from "@/components/TicketReceipt";
 
 export default function PublicLayout({
   children,
@@ -17,7 +18,7 @@ export default function PublicLayout({
       </a>
       <SiteHeader />
       <main id="konten" className="flex-1">
-        {children}
+        <TicketReceiptProvider>{children}</TicketReceiptProvider>
       </main>
       <SiteFooter />
       <QuickExitButton />

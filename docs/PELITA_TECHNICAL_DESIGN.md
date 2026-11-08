@@ -450,19 +450,19 @@ Seed (`prisma/seed.ts`): 1 super admin (password dari env sementara, wajib digan
 Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 
 ### Fase 0 — Setup (1–3 Nov)
-- [ ] Inisialisasi Next.js + TypeScript + Tailwind + shadcn/ui, ESLint, Prettier.
-- [ ] Setup Prisma + PostgreSQL (docker-compose), migrasi dari skema Bagian 6.
-- [ ] `lib/crypto.ts`, `lib/ticket.ts` + unit test (enkripsi round-trip, tiket valid/invalid, normalisasi).
-- [ ] `.env.example`, `npm run gen:keys`, header keamanan di `next.config`.
-- [ ] Layout publik + `QuickExitButton` + landing page (FR-05).
+- [x] Inisialisasi Next.js + TypeScript + Tailwind + shadcn/ui, ESLint, Prettier.
+- [x] Setup Prisma + PostgreSQL (docker-compose), migrasi dari skema Bagian 6.
+- [x] `lib/crypto.ts`, `lib/ticket.ts` + unit test (enkripsi round-trip, tiket valid/invalid, normalisasi).
+- [x] `.env.example`, `npm run gen:keys`, header keamanan di `next.config`.
+- [x] Layout publik + `QuickExitButton` + landing page (FR-05).
 
 ### Fase 1 — Inti Pelaporan (P0) (4–10 Nov)
-- [ ] `POST /api/reports` + form `/lapor` (FR-01).
-- [ ] Pipeline bukti: validasi magic bytes, sharp strip EXIF, hash, enkripsi, simpan (FR-02).
-- [ ] Halaman `/lapor/berhasil` (tiket sekali tampil, salin/unduh).
-- [ ] `POST /api/tickets/lookup`, `/tickets/messages`, `/tickets/evidence`, halaman `/status` + polling (FR-03).
-- [ ] Rate limit tanpa simpan IP.
-- [ ] Test: buat laporan → tiket → lookup → kirim pesan.
+- [x] `POST /api/reports` + form `/lapor` (FR-01).
+- [x] Pipeline bukti: validasi magic bytes, sharp strip EXIF, hash, enkripsi, simpan (FR-02).
+- [x] Halaman `/lapor/berhasil` (tiket sekali tampil, salin/unduh).
+- [x] `POST /api/tickets/lookup`, `/tickets/messages`, `/tickets/evidence`, halaman `/status` + polling (FR-03).
+- [x] Rate limit tanpa simpan IP.
+- [x] Test: buat laporan → tiket → lookup → kirim pesan.
 
 ### Fase 2 — Admin (P0) (11–17 Nov)
 - [ ] Auth admin (argon2, sesi JWT cookie, RBAC, rate limit login).
