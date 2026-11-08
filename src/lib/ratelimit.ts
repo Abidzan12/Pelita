@@ -24,17 +24,21 @@ function rotateSaltIfNeeded(): void {
   buckets.clear();
 }
 
-function clientKey(request: Request): string {
-  // IP hanya dipakai untuk hash di memori, tidak pernah disimpan atau di-log.
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip =
-    forwarded?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip")?.trim() ||
-    "tidak-diketahui";
+function hmacKey(value: string): string {
   const secret = process.env.SESSION_SECRET
     ? Buffer.from(process.env.SESSION_SECRET, "base64")
     : fallbackSecret;
-  return createHmac("sha256", secret).update(`${salt}:${ip}`).digest("hex");
+  return createHmac("sha256", secret).update(`${salt}:${value}`).digest("hex");
+}
+
+function requestValue(request: Request): string {
+  // IP hanya dipakai untuk hash di memori, tidak pernah disimpan atau di-log.
+  const forwarded = request.headers.get("x-forwarded-for");
+  return (
+    forwarded?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip")?.trim() ||
+    "tidak-diketahui"
+  );
 }
 
 export type RateLimitResult = {
@@ -42,24 +46,18 @@ export type RateLimitResult = {
   retryAfterSeconds: number;
 };
 
-export function limitRequest(
-  request: Request,
-  namespace: string,
-  limit: number,
-  windowMs: number,
-): RateLimitResult {
+function consume(key: string, limit: number, windowMs: number): RateLimitResult {
   rotateSaltIfNeeded();
 
   if (buckets.size > 10_000) {
     const now = Date.now();
-    for (const [key, bucket] of buckets) {
+    for (const [bucketKey, bucket] of buckets) {
       if (bucket.resetAt <= now) {
-        buckets.delete(key);
+        buckets.delete(bucketKey);
       }
     }
   }
 
-  const key = `${namespace}:${clientKey(request)}`;
   const now = Date.now();
   const bucket = buckets.get(key);
 
@@ -77,4 +75,62 @@ export function limitRequest(
 
   bucket.count += 1;
   return { allowed: true, retryAfterSeconds: 0 };
+}
+
+export function limitRequest(
+  request: Request,
+  namespace: string,
+  limit: number,
+  windowMs: number,
+): RateLimitResult {
+  return consume(`${namespace}:${hmacKey(requestValue(request))}`, limit, windowMs);
+}
+
+export function limitValue(
+  namespace: string,
+  value: string,
+  limit: number,
+  windowMs: number,
+): RateLimitResult {
+  return consume(`${namespace}:${hmacKey(value)}`, limit, windowMs);
+}
+
+export type FailureStatus = {
+  limited: boolean;
+  retryAfterSeconds: number;
+};
+
+export function peekFailures(
+  namespace: string,
+  value: string,
+  limit: number,
+): FailureStatus {
+  rotateSaltIfNeeded();
+  const bucket = buckets.get(`${namespace}:${hmacKey(value)}`);
+  if (!bucket || bucket.resetAt <= Date.now()) {
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+  if (bucket.count < limit) {
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+  return {
+    limited: true,
+    retryAfterSeconds: Math.max(1, Math.ceil((bucket.resetAt - Date.now()) / 1000)),
+  };
+}
+
+export function recordFailure(namespace: string, value: string, windowMs: number): void {
+  rotateSaltIfNeeded();
+  const key = `${namespace}:${hmacKey(value)}`;
+  const now = Date.now();
+  const bucket = buckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return;
+  }
+  bucket.count += 1;
+}
+
+export function clearFailures(namespace: string, value: string): void {
+  buckets.delete(`${namespace}:${hmacKey(value)}`);
 }

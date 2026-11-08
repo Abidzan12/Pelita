@@ -38,3 +38,22 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 
 - Nomor/kanal kontak darurat, koordinat kampus, dan akun seed diisi dengan
   placeholder `ISI_OLEH_TIM`. Agent tidak mengarang data tersebut.
+
+## Admin & seed
+
+- Sesi admin memakai JWT HS256 di cookie `httpOnly`, `sameSite=strict`, `secure` di
+  produksi, berlaku 8 jam. Peran dibaca ulang dari database pada setiap request agar
+  akun yang dinonaktifkan langsung kehilangan akses.
+- Login dibatasi 5 kegagalan per akun per 15 menit dan 20 percobaan per IP per 15
+  menit. Kunci disimpan sebagai HMAC di memori, bukan email/IP mentah.
+- Endpoint admin yang mengubah data memeriksa header `Origin` terhadap `APP_URL`
+  (fallback: origin request) sebagai proteksi CSRF, selain cookie `sameSite=strict`.
+- Seed membuat akun demo `super.admin@pelita.local`, `satgas.demo@pelita.local`, dan
+  `konselor.demo@pelita.local` dengan password dari `.env`. Kredensial demo ini hanya
+  untuk prototipe dan wajib diganti sebelum deploy.
+- `AuditLog` mencatat VIEW_REPORT, VIEW_EVIDENCE, CHANGE_STATUS, ASSIGN_REPORT, dan
+  SEND_MESSAGE. Karena halaman detail dirender di server, satu kunjungan dapat
+  menghasilkan lebih dari satu catatan VIEW_REPORT bila halaman dirender ulang.
+- Konselor hanya dapat melihat laporan yang ditugaskan kepadanya dan tidak dapat
+  mengunduh isi bukti atau mengubah status. Batasan ini dicek di server, bukan hanya
+  disembunyikan di UI.

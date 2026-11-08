@@ -465,10 +465,10 @@ Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 - [x] Test: buat laporan → tiket → lookup → kirim pesan.
 
 ### Fase 2 — Admin (P0) (11–17 Nov)
-- [ ] Auth admin (argon2, sesi JWT cookie, RBAC, rate limit login).
-- [ ] Daftar laporan, detail, ubah status, tugaskan, balas chat, unduh bukti (FR-04).
-- [ ] Audit log.
-- [ ] Test RBAC: konselor tidak bisa membuka laporan yang tidak ditugaskan.
+- [x] Auth admin (argon2, sesi JWT cookie, RBAC, rate limit login).
+- [x] Daftar laporan, detail, ubah status, tugaskan, balas chat, unduh bukti (FR-04).
+- [x] Audit log.
+- [x] Test RBAC: konselor tidak bisa membuka laporan yang tidak ditugaskan.
 
 ### Fase 3 — Layanan Pendukung (P1) (18–21 Nov)
 - [ ] Konseling: slot (admin) + booking (publik) + kode booking (FR-06).

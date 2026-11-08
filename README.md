@@ -9,9 +9,23 @@ Keputusan yang tidak diatur di sana dicatat di [`docs/ASSUMPTIONS.md`](docs/ASSU
 
 ## Status
 
-Fase 0 (setup) dan Fase 1 (inti pelaporan P0) selesai: laporan anonim + tiket,
-pipeline bukti terenkripsi, cek status, chat dua arah, dan polling. Panel admin
-(Fase 2) sedang dikerjakan.
+Fase 0 (setup), Fase 1 (inti pelaporan P0), dan Fase 2 (panel admin P0) selesai:
+laporan anonim + tiket, pipeline bukti terenkripsi, cek status, chat dua arah,
+autentikasi admin, RBAC, audit log, dan pengelolaan laporan. Layanan pendukung
+(Fase 3) sedang dikerjakan.
+
+## Akun demo
+
+Setelah `npm run db:seed`, akun berikut tersedia (password diambil dari
+`SEED_DEMO_PASSWORD` di `.env`):
+
+| Peran         | Email                        |
+| ------------- | ---------------------------- |
+| Super Admin   | `super.admin@pelita.local`   |
+| Satgas PPKS   | `satgas.demo@pelita.local`   |
+| Konselor ULBK | `konselor.demo@pelita.local` |
+
+Ganti password demo sebelum deploy. Jangan memakai akun ini untuk data nyata.
 
 ## Stack
 
