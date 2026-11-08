@@ -16,5 +16,27 @@ services:
       timeout: 5s
       retries: 10
 
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://pelita:${POSTGRES_PASSWORD:-pelita_dev_password}@db:5432/pelita
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY}
+      TICKET_PEPPER: ${TICKET_PEPPER}
+      SESSION_SECRET: ${SESSION_SECRET}
+      EVIDENCE_DIR: /app/storage/evidence
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      CAMPUS_MAP_LAT: ${CAMPUS_MAP_LAT:-}
+      CAMPUS_MAP_LNG: ${CAMPUS_MAP_LNG:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - pelita-evidence:/app/storage/evidence
+
 volumes:
   pelita-db:
+  pelita-evidence:

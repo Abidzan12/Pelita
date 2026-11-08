@@ -36,6 +36,16 @@ const nextConfig: NextConfig = {
       { source: "/lapor", headers: noStore },
       { source: "/status/:path*", headers: noStore },
       { source: "/status", headers: noStore },
+      { source: "/konseling", headers: noStore },
+      { source: "/konseling/:path*", headers: noStore },
+      {
+        source: "/admin",
+        headers: [...noStore, { key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/admin/:path*",
+        headers: [...noStore, { key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
     ];
   },
 };

@@ -10,11 +10,11 @@ Keputusan yang tidak diatur di sana dicatat di [`docs/ASSUMPTIONS.md`](docs/ASSU
 ## Status
 
 Fase 0 (setup), Fase 1 (inti pelaporan P0), Fase 2 (panel admin P0), Fase 3
-(layanan pendukung P1), dan Fase 4 (edukasi & peta P2) selesai: laporan anonim +
-tiket, pipeline bukti terenkripsi, cek status, chat dua arah, autentikasi admin,
-RBAC, audit log, konseling, chatbot berbasis aturan, statistik semester, artikel
-Markdown tersanitasi, dan peta titik rawan. Fase 5 (pengujian & hardening) sedang
-dikerjakan.
+(layanan pendukung P1), Fase 4 (edukasi & peta P2), dan Fase 5 (pengujian,
+hardening, dokumentasi, deploy) selesai: laporan anonim + tiket, pipeline bukti
+terenkripsi, cek status, chat dua arah, autentikasi admin, RBAC, audit log,
+konseling, chatbot berbasis aturan, statistik semester, artikel Markdown
+tersanitasi, dan peta titik rawan.
 
 ## Akun demo
 
@@ -64,13 +64,38 @@ Buka <http://localhost:3000>.
 | `npm run db:migrate`        | Migrasi Prisma                                        |
 | `npm run db:seed`           | Seed data demo                                        |
 | `npm run db:up` / `db:down` | Menyalakan/mematikan PostgreSQL                       |
+| `npm test`                  | Unit test (Vitest)                                    |
+| `npm run test:e2e`          | E2E Playwright (butuh database dan akun seed)         |
+
+## Menjalankan dengan Docker (demo)
+
+```bash
+cp .env.example .env
+npm run gen:keys
+# isi tiga kunci dan akun seed di .env, lalu:
+docker compose up -d --build
+docker compose exec app npx prisma db seed
+```
+
+Aplikasi tersedia di <http://localhost:3000>. Panduan lengkap, termasuk reverse proxy
+dan pengelolaan kunci, ada di [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
+## Pengujian
+
+- Unit test: `npm test` (crypto, tiket, storage, validator, rate limit, RBAC,
+  chatbot).
+- E2E: `npm run test:e2e` menjalankan alur lapor, cek status + chat, balasan admin,
+  Quick Exit, dan uji overflow 360px/1280px. Pastikan database sudah dimigrasi dan
+  `npm run db:seed` sudah dijalankan.
+- Hasil terakhir: 38 unit test lulus, 11 E2E lulus, Lighthouse Accessibility 100
+  pada `/`, `/lapor`, `/konseling`, `/edukasi`, dan `/peta`.
 
 ## Keamanan dan batasan jujur
 
 - Enkripsi adalah **server-side encryption at rest** (AES-256-GCM), bukan enkripsi
   ujung ke ujung. Petugas berwenang tetap dapat membaca laporan.
-- CSP saat ini mengizinkan skrip inline milik Next.js; nonce per-request direncanakan
-  pada fase hardening.
+- CSP masih mengizinkan skrip inline milik Next.js; nonce per-request belum
+  diterapkan pada prototipe ini.
 - Rate limit disimpan di memori proses, bukan di database, dan tidak menyimpan IP.
 - Jangan commit `.env`, kunci, atau isi `storage/evidence`.
 

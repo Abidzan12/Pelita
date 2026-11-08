@@ -11,8 +11,10 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 - **Prisma 6.19.3**: skema pada dokumen teknis memakai `prisma-client-js` dan
   `datasource.url`, yang masih didukung penuh di Prisma 6. Prisma 7 mengubah
   konfigurasi generator dan belum diperlukan untuk prototipe ini.
-- **Tailwind CSS 4** + **shadcn/ui** (gaya `base-nova`): bawaan scaffold terbaru.
-  Komponen tetap lokal di `src/components/ui`, tanpa aset dari CDN.
+- **Tailwind CSS 4** dengan gaya desain shadcn/ui: komponen tetap lokal di
+  `src/components/ui`, tanpa aset dari CDN. Paket CLI `shadcn` dihapus dari
+  `devDependencies` setelah komponennya selesai digenerate, karena memuntahkan
+  dependensi lintas platform yang tidak dipakai lagi saat runtime maupun build.
 - **Vitest 5** untuk unit test.
 - **Zod 4** untuk validasi input.
 - **PostgreSQL 16** (image `postgres:16-alpine`) memenuhi syarat "PostgreSQL 15+".
@@ -25,10 +27,10 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 
 ## Keamanan
 
-- **CSP masih memakai `'unsafe-inline'` untuk skrip.** Next.js menyisipkan skrip
-  hidrasi inline; nonce per-request membutuhkan middleware dan akan dikerjakan pada
-  fase hardening. Header lain (`Referrer-Policy`, `nosniff`, `DENY`, `no-store`)
-  sudah aktif.
+- **CSP masih memakai `'unsafe-inline'` untuk skrip** (lihat catatan Fase 5).
+  Next.js menyisipkan skrip hidrasi inline; nonce per-request membutuhkan
+  middleware dan belum dikerjakan pada versi ini. Header lain
+  (`Referrer-Policy`, `nosniff`, `DENY`, `no-store`) sudah aktif.
 - **Metadata PDF/audio/video:** mengikuti opsi kedua pada dokumen teknis, yaitu
   menerima berkas dan menampilkan catatan di UI bahwa metadata tidak dapat dihapus
   otomatis. Gambar tetap di-re-encode dengan `sharp` sehingga EXIF/GPS hilang.
@@ -109,3 +111,32 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
   sebenarnya belum diisi.
 - Titik rawan hanya menyimpan koordinat, kategori, deskripsi, dan status moderasi.
   Tidak ada relasi ke laporan atau identitas pelapor.
+
+## Fase 5 — hardening & pengujian
+
+- **Audit kerentanan (`npm audit --omit=dev`) menyisakan 3 temuan high dari
+  `deepmerge-ts`** yang masuk lewat `@prisma/config` ← `prisma`. Perbaikannya
+  membutuhkan Prisma 7.10.1 (perubahan semver-major: konfigurasi generator dan
+  datasource berubah), sehingga sengaja tidak di-upgrade pada fase ini dan
+  mendahulukan stabilitas prototipe. Risiko: hanya metadata config saat build,
+  tidak berada di jalur data pelapor. Catatan ini harus dipresentasikan bersama
+  pilihan Prisma 6 di atas.
+- **E2E memakai Playwright** (12 test: alur pelapor, status, admin, konseling,
+  chatbot, responsif), dijalankan lewat `npm run test:e2e`. Playwright adalah
+  satu-satunya alat E2E yang, meskipun dev-dependensi, dianggap cukup untuk
+  demo; tidak dipakai di produksi.
+- **Deploy memakai Docker**: `Dockerfile` build standalone Next.js dan service
+  `app` + `db` di `docker-compose.yml`. Panduan ada di `docs/DEPLOY.md`, termasuk
+  cara menyalakan reverse proxy bebas-IP. `npm audit` pada image produksi tetap
+  menampilkan temuan Prisma di atas.
+- **Strip metadata gambar terverifikasi dengan uji nyata:** berkas PNG dengan
+  GPS dummy diunggah melalui `/lapor`, lalu atbyte yang didekripsi diperiksa
+  ulang — GPS/metadata hilang hasil re-encode `sharp`. Bukti uji ini
+  sengaja dipertahankan di database sebagai demo.
+- **Header keamanan tambahan:** halaman `/admin/*` dikirim `X-Robots-Tag: noindex`
+  dan `robots.txt` menutup `/admin`, sehingga panel tidak tuntas muncul di
+  mesin pencari. CSP masih memakai `'unsafe-inline'` untuk skrip (lihat catatan
+  Keamanan di atas; nonce belum dikerjakan).
+- Kunci `TICKET_PEPPER` dipakai bersama oleh tiket (`ticket:`) dan kode booking
+  (`booking:`) dengan domain HMAC berbeda. Mengubah pepper atau domain memerlukan
+  migrasi data eksplisit; tidak dilakukan pada fase ini.

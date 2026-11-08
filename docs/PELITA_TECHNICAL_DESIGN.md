@@ -480,11 +480,11 @@ Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 - [x] Peta Leaflet + usul & moderasi titik rawan (FR-10).
 
 ### Fase 5 — Pengujian, Hardening, Dokumentasi (25–28 Nov)
-- [ ] Jalankan **Checklist Penerimaan (Bagian 14)**.
-- [ ] E2E Playwright untuk 3 alur: lapor, cek status+chat, admin balas.
-- [ ] Uji responsif HP/laptop dan uji aksesibilitas dasar (Lighthouse ≥ 90).
-- [ ] README: cara instalasi, cara menjalankan, akun demo, batasan keamanan (Bagian 7 catatan jujur).
-- [ ] Deploy demo + data seed.
+- [x] Jalankan **Checklist Penerimaan (Bagian 14)**.
+- [x] E2E Playwright untuk 3 alur: lapor, cek status+chat, admin balas.
+- [x] Uji responsif HP/laptop dan uji aksesibilitas dasar (Lighthouse ≥ 90).
+- [x] README: cara instalasi, cara menjalankan, akun demo, batasan keamanan (Bagian 7 catatan jujur).
+- [x] Deploy demo + data seed.
 
 > Jika waktu mepet, **pangkas dari bawah** (P2 dulu, lalu P1). P0 tidak boleh dikurangi.
 
@@ -493,26 +493,26 @@ Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 ## 14. Checklist Penerimaan (Acceptance Criteria)
 
 **Anonimitas & keamanan**
-- [ ] Tidak ada kolom/log yang menyimpan IP, User-Agent, nama, email, NIM, nomor telepon pelapor (periksa skema DB dan log aplikasi).
-- [ ] Database tidak memuat tiket asli — hanya HMAC-nya.
-- [ ] Deskripsi, pesan, dan file bukti di DB/disk **tidak terbaca** tanpa kunci (verifikasi dengan `SELECT` langsung dan `hexdump`).
-- [ ] Foto uji dengan EXIF GPS: setelah diunggah dan diunduh admin, EXIF/GPS **tidak ada**.
-- [ ] File dengan ekstensi `.jpg` tetapi isi bukan gambar ditolak.
-- [ ] Respons gagal lookup tiket identik untuk semua tiket salah; rate limit aktif.
-- [ ] Header keamanan (Bagian 7.4) hadir; tidak ada request ke domain pihak ketiga dari halaman pelapor.
-- [ ] Akses `/api/admin/*` tanpa sesi → 401; peran salah → 403.
-- [ ] Quick Exit bekerja (klik & `Esc` ×2) di semua halaman publik.
+- [x] Tidak ada kolom/log yang menyimpan IP, User-Agent, nama, email, NIM, nomor telepon pelapor (periksa skema DB dan log aplikasi).
+- [x] Database tidak memuat tiket asli — hanya HMAC-nya.
+- [x] Deskripsi, pesan, dan file bukti di DB/disk **tidak terbaca** tanpa kunci (verifikasi dengan `SELECT` langsung dan `hexdump`).
+- [x] Foto uji dengan EXIF GPS: setelah diunggah dan diunduh admin, EXIF/GPS **tidak ada**.
+- [x] File dengan ekstensi `.jpg` tetapi isi bukan gambar ditolak.
+- [x] Respons gagal lookup tiket identik untuk semua tiket salah; rate limit aktif.
+- [x] Header keamanan (Bagian 7.4) hadir; tidak ada request ke domain pihak ketiga dari halaman pelapor.
+- [x] Akses `/api/admin/*` tanpa sesi → 401; peran salah → 403.
+- [x] Quick Exit bekerja (klik & `Esc` ×2) di semua halaman publik.
 
 **Fungsional**
-- [ ] Alur lapor → tiket → cek status → chat dua arah → status berubah ke SELESAI berjalan.
-- [ ] Admin dapat memverifikasi, menugaskan, membalas, mengunduh bukti, dan melihat statistik.
-- [ ] Booking konseling menghasilkan kode booking dan slot tidak bisa dipesan dua kali.
-- [ ] Chatbot menjawab minimal 10 pertanyaan FAQ dan menampilkan kontak darurat untuk kata kunci bahaya.
-- [ ] Artikel dan peta berfungsi; titik rawan PENDING tidak tampil publik.
+- [x] Alur lapor → tiket → cek status → chat dua arah → status berubah ke SELESAI berjalan.
+- [x] Admin dapat memverifikasi, menugaskan, membalas, mengunduh bukti, dan melihat statistik.
+- [x] Booking konseling menghasilkan kode booking dan slot tidak bisa dipesan dua kali.
+- [x] Chatbot menjawab minimal 10 pertanyaan FAQ dan menampilkan kontak darurat untuk kata kunci bahaya.
+- [x] Artikel dan peta berfungsi; titik rawan PENDING tidak tampil publik.
 
 **Kualitas**
-- [ ] `npm run build`, `npm run lint`, `npm test` lulus tanpa error.
-- [ ] Tampilan benar pada lebar 360px dan 1280px.
+- [x] `npm run build`, `npm run lint`, `npm test` lulus tanpa error.
+- [x] Tampilan benar pada lebar 360px dan 1280px.
 
 ---
 
