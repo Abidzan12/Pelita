@@ -1,0 +1,155 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ReporterRole {
+  KORBAN
+  SAKSI
+}
+
+enum ReportCategory {
+  KEKERASAN_SEKSUAL
+  PERUNDUNGAN
+  KEKERASAN_FISIK
+  LAINNYA
+}
+
+enum ReportStatus {
+  DITERIMA
+  DIVERIFIKASI
+  DALAM_PENANGANAN
+  SELESAI
+  DITOLAK
+}
+
+enum MessageSender {
+  PELAPOR
+  ADMIN
+}
+
+enum AdminRole {
+  SATGAS
+  KONSELOR
+  SUPER_ADMIN
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Report {
+  id           String         @id @default(cuid())
+  ticketHash   String         @unique
+  reporterRole ReporterRole
+  category     ReportCategory
+  incidentDate DateTime?
+  locationText String?
+  descEnc      Bytes
+  descIv       Bytes
+  descTag      Bytes
+  status       ReportStatus   @default(DITERIMA)
+  assignedToId String?
+  assignedTo   Admin?         @relation(fields: [assignedToId], references: [id])
+  evidences    Evidence[]
+  messages     Message[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Evidence {
+  id         String   @id @default(cuid())
+  reportId   String
+  report     Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  storageKey String   @unique
+  mimeType   String
+  sizeBytes  Int
+  iv         Bytes
+  authTag    Bytes
+  sha256     String
+  createdAt  DateTime @default(now())
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  reportId  String
+  report    Report        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  sender    MessageSender
+  adminId   String?
+  bodyEnc   Bytes
+  iv        Bytes
+  tag       Bytes
+  readAt    DateTime?
+  createdAt DateTime      @default(now())
+}
+
+model Admin {
+  id           String           @id @default(cuid())
+  name         String
+  email        String           @unique
+  passwordHash String
+  role         AdminRole
+  totpSecret   String?
+  active       Boolean          @default(true)
+  reports      Report[]
+  slots        CounselingSlot[]
+  createdAt    DateTime         @default(now())
+}
+
+model CounselingSlot {
+  id          String             @id @default(cuid())
+  counselorId String
+  counselor   Admin              @relation(fields: [counselorId], references: [id])
+  startsAt    DateTime
+  endsAt      DateTime
+  mode        String
+  booking     CounselingBooking?
+}
+
+model CounselingBooking {
+  id          String   @id @default(cuid())
+  slotId      String   @unique
+  slot        CounselingSlot @relation(fields: [slotId], references: [id])
+  bookingHash String   @unique
+  aliasName   String?
+  contactEnc  Bytes?
+  contactIv   Bytes?
+  contactTag  Bytes?
+  status      String   @default("DIJADWALKAN")
+  createdAt   DateTime @default(now())
+}
+
+model HazardPoint {
+  id          String           @id @default(cuid())
+  lat         Float
+  lng         Float
+  category    String
+  description String
+  status      ModerationStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  summary   String
+  bodyMd    String
+  category  String
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  action    String
+  targetId  String?
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,21 @@
+{
+  "catatan": "ISI_OLEH_TIM: isi kanal resmi Satgas PPKS UNY, ULBK UNY, dan layanan darurat. Jangan mengarang nomor atau alamat.",
+  "updatedAt": "ISI_OLEH_TIM",
+  "contacts": [
+    {
+      "name": "Satgas PPKS UNY",
+      "channel": "ISI_OLEH_TIM",
+      "description": "Kanal resmi untuk melaporkan kekerasan seksual di lingkungan UNY."
+    },
+    {
+      "name": "ULBK UNY",
+      "channel": "ISI_OLEH_TIM",
+      "description": "Layanan bimbingan dan konseling kampus."
+    },
+    {
+      "name": "Layanan darurat setempat",
+      "channel": "ISI_OLEH_TIM",
+      "description": "Nomor darurat yang berlaku di wilayahmu."
+    }
+  ]
+}
