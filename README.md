@@ -9,10 +9,12 @@ Keputusan yang tidak diatur di sana dicatat di [`docs/ASSUMPTIONS.md`](docs/ASSU
 
 ## Status
 
-Fase 0 (setup), Fase 1 (inti pelaporan P0), Fase 2 (panel admin P0), dan Fase 3
-(layanan pendukung P1) selesai: laporan anonim + tiket, pipeline bukti terenkripsi,
-cek status, chat dua arah, autentikasi admin, RBAC, audit log, konseling, chatbot
-berbasis aturan, dan statistik semester. Edukasi & peta (Fase 4) sedang dikerjakan.
+Fase 0 (setup), Fase 1 (inti pelaporan P0), Fase 2 (panel admin P0), Fase 3
+(layanan pendukung P1), dan Fase 4 (edukasi & peta P2) selesai: laporan anonim +
+tiket, pipeline bukti terenkripsi, cek status, chat dua arah, autentikasi admin,
+RBAC, audit log, konseling, chatbot berbasis aturan, statistik semester, artikel
+Markdown tersanitasi, dan peta titik rawan. Fase 5 (pengujian & hardening) sedang
+dikerjakan.
 
 ## Akun demo
 

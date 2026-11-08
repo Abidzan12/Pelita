@@ -53,3 +53,25 @@ export const counselingSlotUpdateSchema = z.object({
   endsAt: dateTimeString,
   mode: z.enum(["ONLINE", "OFFLINE"]),
 });
+
+export const articleSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(3, "Slug minimal 3 karakter.")
+    .max(80, "Slug maksimal 80 karakter.")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug hanya boleh huruf kecil, angka, dan tanda hubung.",
+    ),
+  title: z.string().trim().min(3, "Judul minimal 3 karakter.").max(200),
+  summary: z.string().trim().min(10, "Ringkasan minimal 10 karakter.").max(500),
+  bodyMd: z.string().trim().min(20, "Isi artikel minimal 20 karakter.").max(20000),
+  category: z.enum(["BYSTANDER", "HUKUM", "PSIKOLOGIS", "UMUM"]),
+  published: z.boolean(),
+});
+
+export const hazardModerationSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
+});

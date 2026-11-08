@@ -65,14 +65,32 @@ export default async function ProtectedAdminLayout({
                 </Link>
               </li>
               {admin.role !== "KONSELOR" ? (
-                <li>
-                  <Link
-                    href="/admin/statistik"
-                    className="inline-flex min-h-11 items-center rounded-md px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                  >
-                    Statistik
-                  </Link>
-                </li>
+                <>
+                  <li>
+                    <Link
+                      href="/admin/statistik"
+                      className="inline-flex min-h-11 items-center rounded-md px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      Statistik
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin/artikel"
+                      className="inline-flex min-h-11 items-center rounded-md px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      Artikel
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/admin/titik-rawan"
+                      className="inline-flex min-h-11 items-center rounded-md px-3 font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      Titik rawan
+                    </Link>
+                  </li>
+                </>
               ) : null}
             </ul>
           </nav>

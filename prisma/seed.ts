@@ -10,9 +10,7 @@ const articles = [
     summary:
       "Cara mengambil tindakan saat melihat kekerasan tanpa menempatkan dirimu atau korban dalam bahaya.",
     category: "BYSTANDER",
-    bodyMd: `# Lima langkah aman menjadi saksi
-
-Sebagai saksi, kamu tidak harus menghadapi pelaku sendirian. Pilih langkah yang paling aman untuk situasi itu. Kalau ragu, utamakan keselamatanmu dan korban.
+    bodyMd: `Sebagai saksi, kamu tidak harus menghadapi pelaku sendirian. Pilih langkah yang paling aman untuk situasi itu. Kalau ragu, utamakan keselamatanmu dan korban.
 
 ## 1. Direct
 Sapa korban atau alihkan percakapan dengan tenang, misalnya menanyakan hal sederhana. Jangan menantang pelaku bila itu berisiko.
@@ -37,9 +35,7 @@ Ingat: keselamatanmu juga penting. Tindakan kecil yang aman tetap berarti.`,
     summary:
       "Kekerasan seksual tidak selalu berupa kontak fisik. Mengenali bentuknya membantu memahami bahwa itu bukan salahmu.",
     category: "UMUM",
-    bodyMd: `# Mengenali bentuk kekerasan seksual
-
-Kekerasan seksual adalah tindakan bernuansa seksual yang dilakukan tanpa persetujuan. Persetujuan harus diberikan dengan sadar, bebas, dan bisa dicabut kapan saja.
+    bodyMd: `Kekerasan seksual adalah tindakan bernuansa seksual yang dilakukan tanpa persetujuan. Persetujuan harus diberikan dengan sadar, bebas, dan bisa dicabut kapan saja.
 
 Bentuknya dapat meliputi:
 
@@ -60,9 +56,7 @@ Kekerasan seksual dapat terjadi pada siapa saja, termasuk laki-laki, dan pelakun
     summary:
       "Langkah umum untuk melapor ke Satgas PPKS, menyimpan bukti, dan menjaga tiket laporan.",
     category: "HUKUM",
-    bodyMd: `# Alur pelaporan di lingkungan kampus
-
-Setiap kampus memiliki mekanisme dan kanal resmi sendiri. Di UNY, pelaporan kekerasan seksual dan perundungan dapat diarahkan ke Satgas PPKS melalui kanal resmi yang tercantum di halaman Kontak Darurat. Prosedur dan tenggat resmi mengikuti kebijakan kampus, bukan halaman ini.
+    bodyMd: `Setiap kampus memiliki mekanisme dan kanal resmi sendiri. Di UNY, pelaporan kekerasan seksual dan perundungan dapat diarahkan ke Satgas PPKS melalui kanal resmi yang tercantum di halaman Kontak Darurat. Prosedur dan tenggat resmi mengikuti kebijakan kampus, bukan halaman ini.
 
 ## Langkah umum
 
@@ -80,9 +74,7 @@ Kamu boleh berhenti kapan saja, bertanya lebih dulu, atau meminta didampingi ora
     summary:
       "Hal kecil yang bisa membantu saat pikiran dan tubuh masih terasa tidak aman.",
     category: "PSIKOLOGIS",
-    bodyMd: `# Merawat diri setelah kejadian
-
-Reaksi setelah kejadian bisa berbeda pada setiap orang: syok, marah, mati rasa, sulit tidur, atau merasa bersalah. Tidak ada reaksi yang "salah".
+    bodyMd: `Reaksi setelah kejadian bisa berbeda pada setiap orang: syok, marah, mati rasa, sulit tidur, atau merasa bersalah. Tidak ada reaksi yang "salah".
 
 ## Hal yang mungkin membantu
 
@@ -154,7 +146,7 @@ async function main() {
   for (const article of articles) {
     await prisma.article.upsert({
       where: { slug: article.slug },
-      update: {},
+      update: { ...article, published: true },
       create: { ...article, published: true },
     });
   }

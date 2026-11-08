@@ -476,8 +476,8 @@ Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 - [x] Statistik semester + ekspor CSV agregat (FR-08).
 
 ### Fase 4 — Edukasi & Peta (P2) (22–24 Nov)
-- [ ] CRUD artikel admin + halaman publik + seed 4 artikel (FR-09).
-- [ ] Peta Leaflet + usul & moderasi titik rawan (FR-10).
+- [x] CRUD artikel admin + halaman publik + seed 4 artikel (FR-09).
+- [x] Peta Leaflet + usul & moderasi titik rawan (FR-10).
 
 ### Fase 5 — Pengujian, Hardening, Dokumentasi (25–28 Nov)
 - [ ] Jalankan **Checklist Penerimaan (Bagian 14)**.

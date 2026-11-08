@@ -23,3 +23,23 @@ export const ADMIN_ROLE_LABELS: Record<string, string> = {
   KONSELOR: "Konselor ULBK",
   SUPER_ADMIN: "Super Admin",
 };
+
+export const ARTICLE_CATEGORY_LABELS: Record<string, string> = {
+  BYSTANDER: "Bystander",
+  HUKUM: "Hukum & prosedur",
+  PSIKOLOGIS: "Psikologis",
+  UMUM: "Umum",
+};
+
+export const HAZARD_CATEGORY_LABELS: Record<string, string> = {
+  GELAP: "Penerangan minim",
+  SEPI: "Sepi",
+  PERNAH_TERJADI_INSIDEN: "Pernah terjadi insiden",
+  LAINNYA: "Lainnya",
+};
+
+export const MODERATION_LABELS: Record<string, string> = {
+  PENDING: "Menunggu moderasi",
+  APPROVED: "Disetujui",
+  REJECTED: "Ditolak",
+};

@@ -51,6 +51,17 @@ export const counselingLookupSchema = z.object({
   bookingCode: z.string().trim().min(1).max(64),
 });
 
+export const hazardPointSchema = z.object({
+  lat: z.number().finite().min(-90).max(90),
+  lng: z.number().finite().min(-180).max(180),
+  category: z.enum(["GELAP", "SEPI", "PERNAH_TERJADI_INSIDEN", "LAINNYA"]),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Deskripsi minimal 10 karakter.")
+    .max(300, "Deskripsi maksimal 300 karakter."),
+});
+
 export type CreateReportInput = z.infer<typeof createReportSchema>;
 
 export function zodFieldErrors(error: z.ZodError): { field: string; message: string }[] {

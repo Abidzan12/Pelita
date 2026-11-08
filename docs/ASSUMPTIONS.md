@@ -16,6 +16,12 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 - **Vitest 5** untuk unit test.
 - **Zod 4** untuk validasi input.
 - **PostgreSQL 16** (image `postgres:16-alpine`) memenuhi syarat "PostgreSQL 15+".
+- **react-markdown 10 + rehype-sanitize 6** untuk merender Markdown artikel. Dipilih
+  karena Markdown perlu ditampilkan dan disanitasi; menulis parser sendiri lebih
+  berisiko. Tidak ada analytics atau pelacak.
+- **leaflet 1.9 + react-leaflet 5** untuk peta, sesuai Bagian 4 dokumen teknis.
+  Ubin peta dimuat dari `tile.openstreetmap.org`; ini satu-satunya permintaan ke
+  domain pihak ketiga dan hanya terjadi di halaman `/peta`.
 
 ## Keamanan
 
@@ -87,3 +93,19 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
   laporan dibuat, hanya untuk laporan yang sudah dibalas.
 - Halaman dan API statistik hanya untuk Satgas dan Super Admin. Ekspor CSV dicatat
   di audit log.
+
+## Artikel & peta
+
+- Markdown artikel dirender dengan `react-markdown` dan disanitasi memakai
+  `rehype-sanitize`. HTML mentah dan tautan `javascript:` dibuang sebelum tampil.
+- Seed memperbarui isi 4 artikel bawaan setiap kali dijalankan. Perubahan manual
+  pada artikel bawaan akan tertimpa bila seed dijalankan ulang.
+- Peta memakai Leaflet + ubin OpenStreetMap. Ini satu-satunya permintaan ke domain
+  pihak ketiga dan hanya terjadi di `/peta`. CSP `img-src` dibuka khusus untuk
+  `*.tile.openstreetmap.org`.
+- `CAMPUS_MAP_LAT` dan `CAMPUS_MAP_LNG` harus diisi tim. Selama kosong, halaman
+  `/peta` menampilkan pemberitahuan dan daftar titik (tanpa peta). Fitur peta sudah
+  diuji dengan koordinat uji sementara, lalu data uji dihapus; koordinat kampus yang
+  sebenarnya belum diisi.
+- Titik rawan hanya menyimpan koordinat, kategori, deskripsi, dan status moderasi.
+  Tidak ada relasi ke laporan atau identitas pelapor.
