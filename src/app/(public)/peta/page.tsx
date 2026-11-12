@@ -5,27 +5,16 @@ import { HAZARD_CATEGORY_LABELS } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
 
-function readCenter(): [number, number] | null {
-  const latRaw = process.env.CAMPUS_MAP_LAT?.trim();
-  const lngRaw = process.env.CAMPUS_MAP_LNG?.trim();
-  if (!latRaw || !lngRaw) {
-    return null;
-  }
-  const lat = Number(latRaw);
-  const lng = Number(lngRaw);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return null;
-  }
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    return null;
-  }
+function readCenter(): [number, number] {
+  const lat = Number(process.env.CAMPUS_MAP_LAT ?? "-7.7713847");
+  const lng = Number(process.env.CAMPUS_MAP_LNG ?? "110.3774998");
   return [lat, lng];
 }
 
 export default async function MapPage() {
   const center = readCenter();
 
-  const points = await prisma.hazardPoint.findMany({
+  const rawPoints = await prisma.hazardPoint.findMany({
     where: { status: "APPROVED" },
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -36,7 +25,9 @@ export default async function MapPage() {
       category: true,
       description: true,
     },
-  });
+  }).catch(() => []);
+
+  const points = Array.isArray(rawPoints) ? rawPoints : [];
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
