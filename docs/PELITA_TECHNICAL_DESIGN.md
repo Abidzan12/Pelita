@@ -477,6 +477,7 @@ Selaras dengan milestone PRD (1–28 November 2026). Centang `[x]` saat selesai.
 
 ### Fase 4 — Edukasi & Peta (P2) (22–24 Nov)
 - [x] CRUD artikel admin + halaman publik + seed 4 artikel (FR-09).
+- [x] Gambar artikel opsional: upload aman di admin dan tampil di halaman edukasi (FR-09).
 - [x] Peta Leaflet + usul & moderasi titik rawan (FR-10).
 
 ### Fase 5 — Pengujian, Hardening, Dokumentasi (25–28 Nov)

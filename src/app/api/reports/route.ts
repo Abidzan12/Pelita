@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import { collectEvidence, discardEvidence } from "@/lib/evidence-upload";
 import { MAX_EVIDENCE_PER_REPORT } from "@/lib/evidence-limits";
 import { limitRequest } from "@/lib/ratelimit";
+import { readFormData, RequestTooLargeError } from "@/lib/request-body";
+import { getMaxUploadBytes } from "@/lib/storage";
 import { generateTicket, hashTicket } from "@/lib/ticket";
 import { createReportSchema, zodFieldErrors } from "@/lib/validators";
 
@@ -27,9 +29,16 @@ export async function POST(request: Request) {
   }
 
   let form: FormData;
+  const maxBodyBytes = getMaxUploadBytes() * MAX_EVIDENCE_PER_REPORT + 1024 * 1024;
   try {
-    form = await request.formData();
-  } catch {
+    form = await readFormData(request, maxBodyBytes);
+  } catch (error) {
+    if (error instanceof RequestTooLargeError) {
+      return NextResponse.json(
+        { ok: false, error: "Berkas yang dikirim terlalu besar." },
+        { status: 413 },
+      );
+    }
     return NextResponse.json(
       { ok: false, error: "Permintaan tidak valid." },
       { status: 400 },

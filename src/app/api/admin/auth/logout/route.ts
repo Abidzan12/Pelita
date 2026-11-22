@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { getCurrentAdmin, isSameOrigin, SESSION_COOKIE, writeAuditLog } from "@/lib/auth";
+import {
+  getCurrentAdmin,
+  isSameOrigin,
+  revokeAdminSessions,
+  SESSION_COOKIE,
+  writeAuditLog,
+} from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -15,6 +21,7 @@ export async function POST(request: Request) {
   const response = NextResponse.json({ ok: true });
 
   if (admin) {
+    await revokeAdminSessions(admin.id);
     await writeAuditLog(admin.id, "LOGOUT");
   }
 

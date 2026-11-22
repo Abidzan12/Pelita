@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { createReport, lookupTicket } from "./helpers";
+import { createReport, lookupTicket, testClientHeaders } from "./helpers";
 
 test("pelapor dapat mengirim laporan dan menerima tiket sekali", async ({ page }) => {
+  await page.setExtraHTTPHeaders(testClientHeaders());
   await page.goto("/lapor");
 
   await page.getByLabel("Saya yang mengalaminya").check();
@@ -36,11 +37,13 @@ test("pelapor dapat membuka status dan mengirim pesan", async ({ page, request }
   );
 
   await page.goto("/status");
-  await page.getByLabel("Tiket").fill(ticket);
+  await page.getByRole("textbox", { name: "Tiket", exact: true }).fill(ticket);
   await page.getByRole("button", { name: "Buka laporan" }).click();
 
   await expect(page.getByRole("heading", { name: "Status laporanmu" })).toBeVisible();
-  await expect(page.getByText("Diterima", { exact: true })).toBeVisible();
+  await expect(
+    page.locator("ol.status-rail").getByText("Diterima", { exact: true }),
+  ).toBeVisible();
   expect(page.url()).not.toContain(ticket);
 
   const message = "Pesan uji E2E dari pelapor. Mohon ditindaklanjuti.";

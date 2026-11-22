@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,18 +64,21 @@ export function AdminSlotForm({
   }
 
   return (
-    <form onSubmit={createSlot} className="rounded-lg border border-border bg-card p-5">
+    <form onSubmit={createSlot} className="admin-card p-5">
       <h2 className="text-lg font-semibold">Tambah slot konseling</h2>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <p className="mt-1 text-sm text-muted-foreground">
+        Tentukan jadwal dan mode pertemuan.
+      </p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {isSuperAdmin ? (
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-3">
             <Label htmlFor="counselorId">Konselor</Label>
             <select
               id="counselorId"
               value={counselorId}
               onChange={(event) => setCounselorId(event.target.value)}
               required
-              className="mt-2 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              className="admin-control mt-1.5"
             >
               <option value="">Pilih konselor</option>
               {counselors.map((counselor) => (
@@ -94,7 +98,7 @@ export function AdminSlotForm({
             value={startsAt}
             onChange={(event) => setStartsAt(event.target.value)}
             required
-            className="mt-2 h-11 bg-background"
+            className="mt-1.5 h-11 bg-background"
           />
         </div>
         <div>
@@ -105,7 +109,7 @@ export function AdminSlotForm({
             value={endsAt}
             onChange={(event) => setEndsAt(event.target.value)}
             required
-            className="mt-2 h-11 bg-background"
+            className="mt-1.5 h-11 bg-background"
           />
         </div>
         <div>
@@ -114,7 +118,7 @@ export function AdminSlotForm({
             id="mode"
             value={mode}
             onChange={(event) => setMode(event.target.value)}
-            className="mt-2 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            className="admin-control mt-1.5"
           >
             <option value="ONLINE">Online</option>
             <option value="OFFLINE">Tatap muka</option>
@@ -128,12 +132,13 @@ export function AdminSlotForm({
         </p>
       ) : null}
       {notice ? (
-        <p role="status" className="mt-3 text-sm text-primary">
+        <p role="status" className="mt-3 text-sm font-medium text-primary">
           {notice}
         </p>
       ) : null}
 
       <Button type="submit" disabled={saving} className="mt-4 h-11 px-5">
+        <Plus aria-hidden="true" />
         {saving ? "Menyimpan..." : "Tambah slot"}
       </Button>
     </form>

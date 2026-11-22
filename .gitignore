@@ -46,3 +46,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local AI agent tooling & external skill packs
+/.agents/
+/.impeccable/
+/.opencode/commands/
+/.opencode/skills/banner-design/
+/.opencode/skills/brand/
+/.opencode/skills/design/
+/.opencode/skills/design-system/
+/.opencode/skills/impeccable/
+/.opencode/skills/security-audit/
+/.opencode/skills/slides/
+/.opencode/skills/ui-styling/
+/.opencode/skills/ui-ux-pro-max/

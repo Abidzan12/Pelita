@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { decryptToString } from "@/lib/crypto";
 import { prisma } from "@/lib/db";
 import { limitRequest } from "@/lib/ratelimit";
@@ -20,7 +21,7 @@ async function respond(body: unknown, status: number, startedAt: number) {
 
 export async function POST(request: Request) {
   const startedAt = Date.now();
-  const limit = limitRequest(request, "tickets-lookup", 10, 60_000);
+  const limit = limitRequest(request, "tickets-lookup", 30, 60_000);
   if (!limit.allowed) {
     return NextResponse.json(
       { ok: false, error: "Terlalu banyak percobaan. Coba lagi nanti." },
@@ -30,8 +31,11 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = await readJson(request);
+  } catch (error) {
+    if (error instanceof RequestTooLargeError) {
+      return respond({ ok: false, error: "Permintaan terlalu besar." }, 413, startedAt);
+    }
     return respond(NOT_FOUND, 404, startedAt);
   }
 

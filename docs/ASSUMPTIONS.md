@@ -22,8 +22,8 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
   karena Markdown perlu ditampilkan dan disanitasi; menulis parser sendiri lebih
   berisiko. Tidak ada analytics atau pelacak.
 - **leaflet 1.9 + react-leaflet 5** untuk peta, sesuai Bagian 4 dokumen teknis.
-  Ubin peta dimuat dari `tile.openstreetmap.org`; ini satu-satunya permintaan ke
-  domain pihak ketiga dan hanya terjadi di halaman `/peta`.
+  Peta memakai gambar denah lokal (`/images/denah-ft-uny.jpeg`) di `/peta` tanpa
+  permintaan ke domain pihak ketiga.
 
 ## Keamanan
 
@@ -37,8 +37,12 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 - **Tiket:** normalisasi hanya mengubah huruf besar serta menghapus spasi dan tanda
   hubung. Prefiks `PLT` tetap menjadi bagian tiket yang di-hash; tiket tanpa `PLT`
   dianggap tidak valid.
-- **Rate limit** disimpan di memori proses. Pada deployment multi-instance, batas
-  ini berlaku per instance; cukup untuk prototipe demo.
+- **Rate limit** disimpan di memori proses dalam dua tabel terpisah: bucket
+  permintaan publik dan bucket kegagalan login admin (`admin-login-account`), sehingga
+  banjir permintaan publik tidak menghapus penguncian akun. Pada deployment
+  multi-instance, batas ini berlaku per instance; cukup untuk prototipe demo. Batas
+  `tickets-lookup` dinaikkan menjadi 30 permintaan/menit agar polling 8 detik di
+  `/status` dan kirim pesan/unggah bukti tidak memicu 429 saat penggunaan normal.
 - **Cookie pelapor** tidak dibuat sama sekali. State pelapor hanya ada di memori
   halaman dan bergantung pada tiket.
 
@@ -49,9 +53,11 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 
 ## Admin & seed
 
-- Sesi admin memakai JWT HS256 di cookie `httpOnly`, `sameSite=strict`, `secure` di
-  produksi, berlaku 8 jam. Peran dibaca ulang dari database pada setiap request agar
-  akun yang dinonaktifkan langsung kehilangan akses.
+- Sesi admin memakai JWT HS256 (`iss: "pelita"`, `aud: "pelita-admin"`, `jti`, dan
+  `ver: tokenVersion`) di cookie `httpOnly`, `sameSite=strict`, `secure` di
+  produksi, berlaku 8 jam. Peran, status `active`, dan `tokenVersion` dibaca ulang
+  dari database pada setiap request sehingga akun yang dinonaktifkan atau sudah
+  logout langsung kehilangan akses.
 - Login dibatasi 5 kegagalan per akun per 15 menit dan 20 percobaan per IP per 15
   menit. Kunci disimpan sebagai HMAC di memori, bukan email/IP mentah.
 - Endpoint admin yang mengubah data memeriksa header `Origin` terhadap `APP_URL`
@@ -100,11 +106,15 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 
 - Markdown artikel dirender dengan `react-markdown` dan disanitasi memakai
   `rehype-sanitize`. HTML mentah dan tautan `javascript:` dibuang sebelum tampil.
+- Gambar artikel bersifat opsional, dibatasi 5 MB, hanya menerima JPG/PNG/WebP,
+  di-re-encode untuk menghapus metadata, lalu dienkripsi di luar `public/`. Gambar
+  hanya disajikan lewat endpoint same-origin untuk artikel yang berstatus terbit;
+  deskripsi gambar wajib diisi saat gambar digunakan.
 - Seed memperbarui isi 4 artikel bawaan setiap kali dijalankan. Perubahan manual
   pada artikel bawaan akan tertimpa bila seed dijalankan ulang.
-- Peta memakai Leaflet + ubin OpenStreetMap. Ini satu-satunya permintaan ke domain
-  pihak ketiga dan hanya terjadi di `/peta`. CSP `img-src` dibuka khusus untuk
-  `*.tile.openstreetmap.org`.
+- Peta memakai Leaflet dengan denah gambar lokal (`/images/denah-ft-uny.jpeg`) di
+  `/peta`. Tidak ada permintaan ke domain pihak ketiga; CSP `img-src` tetap dibatasi
+  ke `'self' data: blob:`.
 - `CAMPUS_MAP_LAT` dan `CAMPUS_MAP_LNG` harus diisi tim. Selama kosong, halaman
   `/peta` menampilkan pemberitahuan dan daftar titik (tanpa peta). Fitur peta sudah
   diuji dengan koordinat uji sementara, lalu data uji dihapus; koordinat kampus yang

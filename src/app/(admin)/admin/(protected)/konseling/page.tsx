@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminSlotDeleteButton } from "@/components/admin/AdminSlotDeleteButton";
 import { AdminSlotForm } from "@/components/admin/AdminSlotForm";
 import { getCurrentAdmin } from "@/lib/auth";
 import { decryptToString } from "@/lib/crypto";
 import { prisma } from "@/lib/db";
+import { BOOKING_STATUS_LABELS } from "@/lib/labels";
 
 const dateTimeFormatter = new Intl.DateTimeFormat("id-ID", {
   weekday: "short",
@@ -23,10 +25,20 @@ const modeLabels: Record<string, string> = {
   OFFLINE: "Tatap muka",
 };
 
+const bookingStyles: Record<string, string> = {
+  DIJADWALKAN: "border-[#c9a53f] bg-[#f7dc85] text-[#3f3110]",
+  SELESAI: "border-[#8fae9b] bg-[#e7f0e8] text-[#2c4a3d]",
+  DIBATALKAN: "border-[#c9c1ac] bg-[#efe9da] text-[#5c6660]",
+};
+
 export default async function AdminCounselingPage() {
   const admin = await getCurrentAdmin();
   if (!admin) {
     redirect("/admin/login");
+  }
+  // Kontak konseling hanya untuk Konselor dan Super Admin (lihat ASSUMPTIONS).
+  if (admin.role !== "KONSELOR" && admin.role !== "SUPER_ADMIN") {
+    redirect("/admin");
   }
 
   const isSuperAdmin = admin.role === "SUPER_ADMIN";
@@ -79,26 +91,37 @@ export default async function AdminCounselingPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Konseling</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Kelola slot dan lihat permintaan konseling. Kontak hanya ditampilkan kepada
-          petugas konseling.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Konseling"
+        description="Kelola slot dan lihat permintaan konseling. Kontak hanya ditampilkan kepada petugas konseling."
+      />
 
       <AdminSlotForm isSuperAdmin={isSuperAdmin} counselors={counselors} />
 
       <section aria-labelledby="slot-heading">
-        <h2 id="slot-heading" className="text-lg font-semibold">
-          Slot
-        </h2>
-        {slots.length === 0 ? (
-          <p className="mt-2 rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-            Belum ada slot.
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 id="slot-heading" className="text-lg font-semibold">
+              Slot
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Jadwal yang tampil di halaman konseling.
+            </p>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground tabular-nums">
+              {slots.length}
+            </span>{" "}
+            slot
           </p>
+        </div>
+
+        {slots.length === 0 ? (
+          <div className="admin-empty mt-3">
+            <p className="text-sm text-muted-foreground">Belum ada slot.</p>
+          </div>
         ) : (
-          <ul className="mt-3 divide-y divide-border rounded-lg border border-border bg-card">
+          <ul className="admin-card mt-3 divide-y divide-border">
             {slots.map((slot) => (
               <li
                 key={slot.id}
@@ -108,7 +131,7 @@ export default async function AdminCounselingPage() {
                   {dateTimeFormatter.format(slot.startsAt)}–
                   {timeFormatter.format(slot.endsAt)}
                 </span>
-                <span className="text-muted-foreground">
+                <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   {modeLabels[slot.mode] ?? slot.mode}
                 </span>
                 {isSuperAdmin ? (
@@ -117,7 +140,7 @@ export default async function AdminCounselingPage() {
                   </span>
                 ) : null}
                 {slot.booking ? (
-                  <span className="rounded-md border border-primary/25 bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                  <span className="rounded-md border border-[#c9a53f] bg-[#f7dc85] px-2 py-0.5 text-xs font-semibold text-[#3f3110]">
                     Dipesan{slot.booking.aliasName ? ` · ${slot.booking.aliasName}` : ""}
                   </span>
                 ) : (
@@ -133,33 +156,41 @@ export default async function AdminCounselingPage() {
       </section>
 
       <section aria-labelledby="booking-heading">
-        <h2 id="booking-heading" className="text-lg font-semibold">
-          Permintaan konseling
-        </h2>
-        {bookings.length === 0 ? (
-          <p className="mt-2 rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-            Belum ada permintaan konseling.
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 id="booking-heading" className="text-lg font-semibold">
+              Permintaan konseling
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Kontak ditampilkan hanya untuk petugas konseling.
+            </p>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground tabular-nums">
+              {bookings.length}
+            </span>{" "}
+            permintaan
           </p>
+        </div>
+
+        {bookings.length === 0 ? (
+          <div className="admin-empty mt-3">
+            <p className="text-sm text-muted-foreground">
+              Belum ada permintaan konseling.
+            </p>
+          </div>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-lg border border-border bg-card">
-            <table className="w-full min-w-[680px] text-left text-sm">
-              <thead className="border-b border-border bg-muted/50 text-xs text-muted-foreground">
+          <div className="admin-card mt-3 overflow-x-auto">
+            <table className="admin-table min-w-[680px]">
+              <thead>
                 <tr>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Jadwal
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Alias
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Kontak
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Status
-                  </th>
+                  <th scope="col">Jadwal</th>
+                  <th scope="col">Alias</th>
+                  <th scope="col">Kontak</th>
+                  <th scope="col">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {bookings.map((booking) => {
                   const contact =
                     booking.contactEnc && booking.contactIv && booking.contactTag
@@ -171,7 +202,7 @@ export default async function AdminCounselingPage() {
                       : null;
                   return (
                     <tr key={booking.id}>
-                      <td className="px-4 py-3">
+                      <td>
                         <p className="font-medium">
                           {dateTimeFormatter.format(booking.slot.startsAt)}–
                           {timeFormatter.format(booking.slot.endsAt)}
@@ -181,11 +212,18 @@ export default async function AdminCounselingPage() {
                           {isSuperAdmin ? ` · ${booking.slot.counselor.name}` : ""}
                         </p>
                       </td>
-                      <td className="px-4 py-3">{booking.aliasName ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {contact ?? "Tidak diisi"}
+                      <td>{booking.aliasName ?? "—"}</td>
+                      <td className="text-muted-foreground">{contact ?? "Tidak diisi"}</td>
+                      <td>
+                        <span
+                          className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${
+                            bookingStyles[booking.status] ??
+                            "border-border bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
+                        </span>
                       </td>
-                      <td className="px-4 py-3">{booking.status}</td>
                     </tr>
                   );
                 })}

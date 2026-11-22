@@ -7,7 +7,8 @@ services:
       POSTGRES_USER: pelita
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pelita_dev_password}
     ports:
-      - "5432:5432"
+      # 5432 dipakai DB proyek lama; ikat ke loopback agar tidak terbuka ke jaringan luar.
+      - "127.0.0.1:5433:5432"
     volumes:
       - pelita-db:/var/lib/postgresql/data
     healthcheck:
@@ -28,15 +29,18 @@ services:
       TICKET_PEPPER: ${TICKET_PEPPER}
       SESSION_SECRET: ${SESSION_SECRET}
       EVIDENCE_DIR: /app/storage/evidence
+      ARTICLE_IMAGE_DIR: /app/storage/article-images
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
       APP_URL: ${APP_URL:-http://localhost:3000}
       CAMPUS_MAP_LAT: ${CAMPUS_MAP_LAT:-}
       CAMPUS_MAP_LNG: ${CAMPUS_MAP_LNG:-}
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - pelita-evidence:/app/storage/evidence
+      - pelita-article-images:/app/storage/article-images
 
 volumes:
   pelita-db:
   pelita-evidence:
+  pelita-article-images:

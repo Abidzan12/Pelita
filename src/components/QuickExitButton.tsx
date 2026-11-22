@@ -38,9 +38,9 @@ export function QuickExitButton() {
       onClick={exit}
       aria-label="Keluar cepat dari situs ini dan buka Google"
       title="Keluar cepat (atau tekan Esc dua kali)"
-      className="fixed right-4 bottom-4 z-50 inline-flex min-h-11 items-center gap-2 rounded-md border border-foreground/15 bg-foreground px-4 text-sm font-medium text-background shadow-lg transition-colors hover:bg-foreground/90 focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none"
+      className="fixed right-4 bottom-4 z-50 inline-flex min-h-11 items-center gap-2 rounded-[3px] border border-[#f1c957] bg-[#122744] px-4 text-sm font-extrabold text-[#fff7e9] shadow-[0_6px_0_#0b1a2e] transition-colors hover:bg-[#163456] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#f1c957]"
     >
-      <DoorOpen aria-hidden="true" className="size-4" />
+      <DoorOpen aria-hidden="true" className="size-4 text-[#f1c957]" />
       Keluar cepat
     </button>
   );

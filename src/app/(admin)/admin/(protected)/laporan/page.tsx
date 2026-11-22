@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { listReports } from "@/lib/admin-reports";
 import { reportListQuerySchema } from "@/lib/admin-validators";
@@ -36,34 +37,36 @@ export default async function AdminReportsPage({
   );
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Laporan</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {admin.role === "KONSELOR"
-              ? "Hanya laporan yang ditugaskan kepadamu."
-              : "Daftar laporan tanpa menampilkan isi kronologi."}
-          </p>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {reports.length} laporan ditampilkan
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Laporan"
+        description={
+          admin.role === "KONSELOR"
+            ? "Hanya laporan yang ditugaskan kepadamu."
+            : "Daftar laporan tanpa menampilkan isi kronologi."
+        }
+      >
+        <p className="rounded-md border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground tabular-nums">
+            {reports.length}
+          </span>{" "}
+          laporan ditampilkan
         </p>
-      </div>
+      </AdminPageHeader>
 
       <form
         method="get"
-        className="mt-5 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-card p-4"
+        className="admin-card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)_auto] lg:items-end"
       >
-        <div className="min-w-40 flex-1">
-          <label htmlFor="status" className="text-xs font-medium text-muted-foreground">
+        <div>
+          <label htmlFor="status" className="text-xs font-semibold text-muted-foreground">
             Status
           </label>
           <select
             id="status"
             name="status"
             defaultValue={filters.status ?? ""}
-            className="mt-1 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            className="admin-control mt-1.5"
           >
             <option value="">Semua status</option>
             {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -74,15 +77,15 @@ export default async function AdminReportsPage({
           </select>
         </div>
 
-        <div className="min-w-40 flex-1">
-          <label htmlFor="category" className="text-xs font-medium text-muted-foreground">
+        <div>
+          <label htmlFor="category" className="text-xs font-semibold text-muted-foreground">
             Kategori
           </label>
           <select
             id="category"
             name="category"
             defaultValue={filters.category ?? ""}
-            className="mt-1 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            className="admin-control mt-1.5"
           >
             <option value="">Semua kategori</option>
             {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
@@ -93,8 +96,8 @@ export default async function AdminReportsPage({
           </select>
         </div>
 
-        <div className="min-w-48 flex-[2]">
-          <label htmlFor="q" className="text-xs font-medium text-muted-foreground">
+        <div>
+          <label htmlFor="q" className="text-xs font-semibold text-muted-foreground">
             Cari
           </label>
           <input
@@ -103,63 +106,57 @@ export default async function AdminReportsPage({
             defaultValue={filters.q ?? ""}
             maxLength={100}
             placeholder="ID laporan atau lokasi"
-            className="mt-1 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            className="admin-control mt-1.5"
           />
         </div>
 
-        <button
-          type="submit"
-          className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-        >
-          Terapkan
-        </button>
-        <Link
-          href="/admin/laporan"
-          className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          Reset
-        </Link>
+        <div className="flex items-center gap-2 sm:col-span-2 lg:col-span-1">
+          <button
+            type="submit"
+            className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Terapkan
+          </button>
+          <Link
+            href="/admin/laporan"
+            className="inline-flex min-h-11 items-center rounded-md px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            Reset
+          </Link>
+        </div>
       </form>
 
       {reports.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed border-border p-10 text-center">
+        <div className="admin-empty">
           <p className="font-medium">Tidak ada laporan yang cocok.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Coba ubah filter atau kosongkan pencarian.
           </p>
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-card">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="border-b border-border bg-muted/50 text-xs text-muted-foreground">
+        <div className="admin-card overflow-x-auto">
+          <table className="admin-table min-w-[760px]">
+            <thead>
               <tr>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Laporan
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Kategori
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Status
-                </th>
-                <th scope="col" className="hidden px-4 py-3 font-medium md:table-cell">
+                <th scope="col">Laporan</th>
+                <th scope="col">Kategori</th>
+                <th scope="col">Status</th>
+                <th scope="col" className="hidden md:table-cell">
                   Ditugaskan
                 </th>
-                <th scope="col" className="hidden px-4 py-3 font-medium lg:table-cell">
+                <th scope="col" className="hidden lg:table-cell">
                   Aktivitas
                 </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Tanggal
-                </th>
+                <th scope="col">Tanggal</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {reports.map((report) => (
-                <tr key={report.id} className="hover:bg-muted/40">
-                  <td className="px-4 py-3">
+                <tr key={report.id}>
+                  <td>
                     <Link
                       href={`/admin/laporan/${report.id}`}
-                      className="font-mono text-xs font-medium text-primary underline-offset-4 hover:underline"
+                      className="font-mono text-xs font-semibold text-primary underline-offset-4 hover:underline"
                     >
                       #{report.id.slice(-6)}
                     </Link>
@@ -167,24 +164,19 @@ export default async function AdminReportsPage({
                       {REPORTER_ROLE_LABELS[report.reporterRole] ?? report.reporterRole}
                     </p>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="font-medium">
                     {CATEGORY_LABELS[report.category] ?? report.category}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     <StatusBadge status={report.status} />
-                    {report.status === "DITERIMA" ? (
-                      <span className="mt-1 block text-xs font-medium text-primary">
-                        Baru
-                      </span>
-                    ) : null}
                   </td>
-                  <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">
+                  <td className="hidden text-muted-foreground md:table-cell">
                     {report.assignedTo?.name ?? "Belum ditugaskan"}
                   </td>
-                  <td className="hidden px-4 py-3 text-xs text-muted-foreground lg:table-cell">
+                  <td className="hidden text-xs text-muted-foreground lg:table-cell">
                     {report._count.messages} pesan · {report._count.evidences} bukti
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                  <td className="text-xs whitespace-nowrap text-muted-foreground">
                     {dateFormatter.format(report.createdAt)}
                   </td>
                 </tr>

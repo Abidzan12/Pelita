@@ -5,6 +5,12 @@ import sharp from "sharp";
 import { decrypt, encrypt } from "./crypto";
 import { DEFAULT_MAX_UPLOAD_MB } from "./evidence-limits";
 
+sharp.cache(false);
+sharp.concurrency(2);
+
+export class EvidenceTooLargeError extends Error {}
+export class InvalidImageError extends Error {}
+
 export const EVIDENCE_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -18,6 +24,19 @@ export const EVIDENCE_MIME_TYPES = [
 export type EvidenceMime = (typeof EVIDENCE_MIME_TYPES)[number];
 
 const IMAGE_MIMES = new Set<EvidenceMime>(["image/jpeg", "image/png", "image/webp"]);
+const VIDEO_BRANDS = new Set([
+  "isom",
+  "iso2",
+  "iso4",
+  "iso5",
+  "iso6",
+  "mp41",
+  "mp42",
+  "avc1",
+  "dash",
+  "M4V ",
+  "MSNV",
+]);
 const STORAGE_KEY_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -78,7 +97,12 @@ export function detectMimeType(buffer: Buffer): EvidenceMime | null {
 
   if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
     const brand = buffer.toString("ascii", 8, 12);
-    return brand.startsWith("M4A") || brand.startsWith("M4B") ? "audio/mp4" : "video/mp4";
+    if (brand.startsWith("M4A") || brand.startsWith("M4B")) {
+      return "audio/mp4";
+    }
+    // HEIC/AVIF juga memakai kotak ftyp. Menyebutnya video berarti metadata
+    // GPS-nya lolos tanpa dibersihkan, jadi hanya brand video yang diterima.
+    return VIDEO_BRANDS.has(brand) ? "video/mp4" : null;
   }
 
   if (
@@ -100,15 +124,23 @@ async function stripMetadata(
     return { data: buffer, mimeType };
   }
 
-  const image = sharp(buffer, { limitInputPixels: 40_000_000 }).rotate();
+  try {
+    const image = sharp(buffer, { limitInputPixels: 25_000_000 })
+      .timeout({ seconds: 10 })
+      .rotate();
 
-  if (mimeType === "image/png") {
-    return { data: await image.png().toBuffer(), mimeType };
+    if (mimeType === "image/png") {
+      return { data: await image.png().toBuffer(), mimeType };
+    }
+    if (mimeType === "image/webp") {
+      return { data: await image.webp({ quality: 90 }).toBuffer(), mimeType };
+    }
+    return { data: await image.jpeg({ quality: 90 }).toBuffer(), mimeType };
+  } catch {
+    throw new InvalidImageError(
+      "Gambar belum bisa diproses. Pastikan berkas tidak rusak atau terlalu besar dimensinya.",
+    );
   }
-  if (mimeType === "image/webp") {
-    return { data: await image.webp({ quality: 90 }).toBuffer(), mimeType };
-  }
-  return { data: await image.jpeg({ quality: 90 }).toBuffer(), mimeType };
 }
 
 export async function saveEvidence(
@@ -116,6 +148,11 @@ export async function saveEvidence(
   mimeType: EvidenceMime,
 ): Promise<StoredEvidence> {
   const cleaned = await stripMetadata(buffer, mimeType);
+  if (cleaned.data.length > getMaxUploadBytes()) {
+    throw new EvidenceTooLargeError(
+      "Ukuran berkas setelah diproses melebihi batas maksimal.",
+    );
+  }
   const sha256 = createHash("sha256").update(cleaned.data).digest("hex");
   const encrypted = encrypt(cleaned.data);
   const storageKey = randomUUID();

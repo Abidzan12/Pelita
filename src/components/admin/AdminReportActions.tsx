@@ -90,64 +90,60 @@ export function AdminReportActions({
   }
 
   return (
-    <section
-      aria-labelledby="tindakan-heading"
-      className="rounded-lg border border-border bg-card p-5"
-    >
+    <section aria-labelledby="tindakan-heading" className="admin-card p-5">
       <h2 id="tindakan-heading" className="text-lg font-semibold">
         Tindakan
       </h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Perbarui status dan penanggung jawab laporan.
+      </p>
 
-      <form onSubmit={saveStatus} className="mt-4 flex flex-wrap items-end gap-3">
-        <div className="min-w-48 flex-1">
-          <Label htmlFor="status">Ubah status</Label>
-          <select
-            id="status"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-            className="mt-2 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
-          >
-            {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <Button type="submit" disabled={savingStatus} className="h-11 px-5">
+      <form onSubmit={saveStatus} className="mt-4 space-y-2">
+        <Label htmlFor="status">Ubah status</Label>
+        <select
+          id="status"
+          value={status}
+          onChange={(event) => setStatus(event.target.value)}
+          className="admin-control"
+        >
+          {Object.entries(STATUS_LABELS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <Button type="submit" disabled={savingStatus} className="h-11 w-full">
           {savingStatus ? "Menyimpan..." : "Simpan status"}
         </Button>
       </form>
 
-      <form onSubmit={saveAssignee} className="mt-4 flex flex-wrap items-end gap-3">
-        <div className="min-w-48 flex-1">
-          <Label htmlFor="assignee">Tugaskan ke</Label>
-          <select
-            id="assignee"
-            value={assignee}
-            onChange={(event) => setAssignee(event.target.value)}
-            className="mt-2 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
-          >
-            <option value="">Belum ditugaskan</option>
-            {admins.map((admin) => (
-              <option key={admin.id} value={admin.id}>
-                {admin.name} — {ADMIN_ROLE_LABELS[admin.role] ?? admin.role}
-              </option>
-            ))}
-          </select>
-        </div>
+      <form onSubmit={saveAssignee} className="mt-5 space-y-2">
+        <Label htmlFor="assignee">Tugaskan ke</Label>
+        <select
+          id="assignee"
+          value={assignee}
+          onChange={(event) => setAssignee(event.target.value)}
+          className="admin-control"
+        >
+          <option value="">Belum ditugaskan</option>
+          {admins.map((admin) => (
+            <option key={admin.id} value={admin.id}>
+              {admin.name} — {ADMIN_ROLE_LABELS[admin.role] ?? admin.role}
+            </option>
+          ))}
+        </select>
         <Button
           type="submit"
           variant="outline"
           disabled={savingAssignee}
-          className="h-11 px-5"
+          className="h-11 w-full"
         >
           {savingAssignee ? "Menyimpan..." : "Simpan penugasan"}
         </Button>
       </form>
 
       {message ? (
-        <p role="status" className="mt-3 text-sm text-primary">
+        <p role="status" className="mt-3 text-sm font-medium text-primary">
           {message}
         </p>
       ) : null}

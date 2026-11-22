@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Image from "next/image";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,8 @@ type ArticleInput = {
   bodyMd: string;
   category: string;
   published: boolean;
+  imageAlt: string | null;
+  imageStorageKey: string | null;
 };
 
 export function ArticleEditor({ article }: { article?: ArticleInput }) {
@@ -26,23 +29,50 @@ export function ArticleEditor({ article }: { article?: ArticleInput }) {
   const [bodyMd, setBodyMd] = useState(article?.bodyMd ?? "");
   const [category, setCategory] = useState(article?.category ?? "UMUM");
   const [published, setPublished] = useState(article?.published ?? false);
+  const [imageAlt, setImageAlt] = useState(article?.imageAlt ?? "");
+  const [image, setImage] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function save(event: React.FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
+  function selectImage(event: ChangeEvent<HTMLInputElement>) {
+    const selected = event.target.files?.[0] ?? null;
+    setImage(selected);
+    setRemoveImage(false);
+    setImagePreview(selected ? URL.createObjectURL(selected) : null);
+  }
+
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
     setError(null);
 
     try {
+      const form = new FormData();
+      form.set("slug", slug);
+      form.set("title", title);
+      form.set("summary", summary);
+      form.set("bodyMd", bodyMd);
+      form.set("category", category);
+      form.set("published", String(published));
+      form.set("imageAlt", imageAlt);
+      form.set("removeImage", String(removeImage));
+      if (image) form.set("image", image);
+
       const response = await fetch(
         article ? `/api/admin/articles/${article.id}` : "/api/admin/articles",
         {
           method: article ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug, title, summary, bodyMd, category, published }),
+          body: form,
         },
       );
       const payload = (await response.json().catch(() => null)) as {
@@ -93,10 +123,7 @@ export function ArticleEditor({ article }: { article?: ArticleInput }) {
   }
 
   return (
-    <form
-      onSubmit={save}
-      className="space-y-5 rounded-lg border border-border bg-card p-5"
-    >
+    <form onSubmit={save} className="admin-card space-y-6 p-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="title">Judul</Label>
@@ -126,7 +153,71 @@ export function ArticleEditor({ article }: { article?: ArticleInput }) {
         </div>
       </div>
 
-      <div>
+      <div className="space-y-3 border-t border-border pt-6">
+        <div>
+          <Label htmlFor="article-image">Gambar artikel (opsional)</Label>
+          <Input
+            id="article-image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={selectImage}
+            className="mt-2 h-auto min-h-11 bg-background file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            JPG, PNG, atau WebP; maksimal 5 MB. Metadata gambar akan dihapus saat
+            diproses.
+          </p>
+        </div>
+        <div>
+          <Label htmlFor="imageAlt">Deskripsi gambar untuk pembaca layar</Label>
+          <Input
+            id="imageAlt"
+            value={imageAlt}
+            onChange={(event) => setImageAlt(event.target.value)}
+            maxLength={200}
+            required={Boolean(image || (article?.imageStorageKey && !removeImage))}
+            placeholder="Jelaskan isi gambar secara singkat"
+            className="mt-2 h-11 bg-background"
+          />
+        </div>
+        {imagePreview || article?.imageStorageKey ? (
+          <div className="max-w-sm">
+            {!removeImage ? (
+              imagePreview ? (
+                // eslint-disable-next-line @next/next/no-img-element -- A local object URL is used for the selected-file preview.
+                <img
+                  src={imagePreview}
+                  alt={imageAlt || "Pratinjau gambar artikel"}
+                  className="aspect-[16/9] max-h-56 w-full rounded-md border border-border object-cover"
+                />
+              ) : article?.slug ? (
+                <div className="relative aspect-[16/9] max-h-56 overflow-hidden rounded-md border border-border bg-muted">
+                  <Image
+                    src={`/api/articles/${article.slug}/image`}
+                    alt={imageAlt || "Pratinjau gambar artikel"}
+                    fill
+                    sizes="384px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : null
+            ) : null}
+            {article?.imageStorageKey ? (
+              <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={removeImage}
+                  onChange={(event) => setRemoveImage(event.target.checked)}
+                  className="size-4 accent-primary"
+                />
+                Hapus gambar saat menyimpan
+              </label>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="border-t border-border pt-6">
         <Label htmlFor="summary">Ringkasan</Label>
         <Textarea
           id="summary"
@@ -146,7 +237,7 @@ export function ArticleEditor({ article }: { article?: ArticleInput }) {
             id="category"
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            className="mt-2 h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+            className="admin-control mt-2"
           >
             {Object.entries(ARTICLE_CATEGORY_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
@@ -168,7 +259,7 @@ export function ArticleEditor({ article }: { article?: ArticleInput }) {
         </div>
       </div>
 
-      <div>
+      <div className="border-t border-border pt-6">
         <Label htmlFor="bodyMd">Isi artikel (Markdown)</Label>
         <Textarea
           id="bodyMd"

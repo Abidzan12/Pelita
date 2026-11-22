@@ -4,5 +4,6 @@
     "skill": {
       "*": "allow"
     }
-  }
+  },
+  "plugin": ["@dietrichgebert/ponytail"]
 }

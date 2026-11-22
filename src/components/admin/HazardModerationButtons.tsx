@@ -46,7 +46,7 @@ export function HazardModerationButtons({
           type="button"
           disabled={saving}
           onClick={() => moderate("APPROVED")}
-          className="inline-flex min-h-10 items-center rounded-md border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+          className="inline-flex min-h-11 items-center rounded-md border border-[#8fae9b] bg-[#e7f0e8] px-3 text-xs font-semibold text-[#2c4a3d] transition-colors hover:bg-[#dbe9dd] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
         >
           Setujui
         </button>
@@ -56,7 +56,7 @@ export function HazardModerationButtons({
           type="button"
           disabled={saving}
           onClick={() => moderate("REJECTED")}
-          className="inline-flex min-h-10 items-center rounded-md border border-destructive/30 bg-destructive/5 px-3 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-60"
+          className="inline-flex min-h-11 items-center rounded-md border border-[#c9a29a] bg-[#f6e2de] px-3 text-xs font-semibold text-[#8a2f1d] transition-colors hover:bg-[#f0d3cd] focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
         >
           Tolak
         </button>
@@ -66,7 +66,7 @@ export function HazardModerationButtons({
           type="button"
           disabled={saving}
           onClick={() => moderate("PENDING")}
-          className="inline-flex min-h-10 items-center rounded-md px-3 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-60"
+          className="inline-flex min-h-11 items-center rounded-md px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
         >
           Tandai pending
         </button>

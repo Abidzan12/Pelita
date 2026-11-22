@@ -70,6 +70,11 @@ export const articleSchema = z.object({
   bodyMd: z.string().trim().min(20, "Isi artikel minimal 20 karakter.").max(20000),
   category: z.enum(["BYSTANDER", "HUKUM", "PSIKOLOGIS", "UMUM"]),
   published: z.boolean(),
+  imageAlt: z
+    .string()
+    .trim()
+    .max(200, "Teks alternatif maksimal 200 karakter.")
+    .optional(),
 });
 
 export const hazardModerationSchema = z.object({

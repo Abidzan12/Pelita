@@ -47,7 +47,7 @@ export function AdminSlotDeleteButton({ slotId }: { slotId: string }) {
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-destructive"
+        className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Trash2 aria-hidden="true" className="size-3.5" />
         Hapus
@@ -61,14 +61,14 @@ export function AdminSlotDeleteButton({ slotId }: { slotId: string }) {
         type="button"
         onClick={remove}
         disabled={deleting}
-        className="inline-flex min-h-11 items-center rounded-md bg-destructive/10 px-2 text-xs font-semibold text-destructive hover:bg-destructive/20"
+        className="inline-flex min-h-11 items-center rounded-md bg-destructive/10 px-2 text-xs font-semibold text-destructive hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {deleting ? "Menghapus..." : "Yakin hapus"}
       </button>
       <button
         type="button"
         onClick={() => setConfirming(false)}
-        className="inline-flex min-h-11 items-center rounded-md px-2 text-xs text-muted-foreground hover:bg-muted"
+        className="inline-flex min-h-11 items-center rounded-md px-2 text-xs text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Batal
       </button>

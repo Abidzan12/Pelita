@@ -1,8 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { jsonError, rejectCrossOrigin, requireAdmin } from "@/lib/admin-api";
-import { articleSchema } from "@/lib/admin-validators";
 import { writeAuditLog } from "@/lib/auth";
+import { deleteArticleImage, ARTICLE_IMAGE_MAX_BYTES } from "@/lib/article-image";
+import { parseArticleForm } from "@/lib/article-upload";
+import { readFormData, RequestTooLargeError } from "@/lib/request-body";
 import { prisma } from "@/lib/db";
 
 export const runtime = "nodejs";
@@ -43,29 +45,48 @@ export async function POST(request: Request) {
     return auth.response;
   }
 
-  let body: unknown;
+  let form: FormData;
   try {
-    body = await request.json();
+    form = await readFormData(request, ARTICLE_IMAGE_MAX_BYTES + 1024 * 1024);
+  } catch (error) {
+    return error instanceof RequestTooLargeError
+      ? jsonError("Berkas yang dikirim terlalu besar.", 413)
+      : jsonError("Permintaan tidak valid.", 400);
+  }
+
+  let parsed: Awaited<ReturnType<typeof parseArticleForm>>;
+  try {
+    parsed = await parseArticleForm(form);
   } catch {
-    return jsonError("Permintaan tidak valid.", 400);
+    return jsonError("Gambar belum bisa diproses. Coba berkas gambar lain.", 400);
+  }
+  if (!parsed.ok) {
+    return jsonError(parsed.error, 400);
   }
 
-  const parsed = articleSchema.safeParse(body);
-  if (!parsed.success) {
-    return jsonError(parsed.error.issues[0]?.message ?? "Data artikel tidak valid.", 400);
-  }
-
+  const { image, data } = parsed.value;
+  let article: { id: string; slug: string };
   try {
-    const article = await prisma.article.create({
-      data: parsed.data,
+    article = await prisma.article.create({
+      data: {
+        ...data,
+        imageStorageKey: image?.storageKey,
+        imageMimeType: image?.mimeType,
+        imageSizeBytes: image?.sizeBytes,
+        imageIv: image ? Uint8Array.from(image.iv) : undefined,
+        imageAuthTag: image ? Uint8Array.from(image.authTag) : undefined,
+      },
       select: { id: true, slug: true },
     });
-    await writeAuditLog(auth.admin.id, "CREATE_ARTICLE", article.id);
-    return NextResponse.json({ ok: true, data: article }, { status: 201 });
   } catch (error) {
+    if (image) {
+      await deleteArticleImage(image.storageKey);
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return jsonError("Slug sudah dipakai artikel lain.", 409);
     }
     return jsonError("Artikel belum bisa disimpan.", 500);
   }
+  await writeAuditLog(auth.admin.id, "CREATE_ARTICLE", article.id);
+  return NextResponse.json({ ok: true, data: article }, { status: 201 });
 }

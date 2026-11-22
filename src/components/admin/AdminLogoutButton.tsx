@@ -24,7 +24,7 @@ export function AdminLogoutButton() {
       type="button"
       onClick={logout}
       disabled={loading}
-      className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"
+      className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-medium text-[#d9e3dc] transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-[#f1c957] focus-visible:outline-none disabled:opacity-60"
     >
       <LogOut aria-hidden="true" className="size-4" />
       {loading ? "Keluar..." : "Keluar"}

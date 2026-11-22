@@ -14,7 +14,8 @@ Pengguna web ini adalah penyintas dan saksi kekerasan. Kesalahan keamanan bukan 
 | `pelita-workflow` | Awal setiap tugas, saat merencanakan, memilih pekerjaan berikutnya, dan menyelesaikan fitur |
 | `pelita-privacy-guard` | Menyentuh laporan, tiket, bukti, chat, logging, skema DB, API, cookie, aset eksternal |
 | `pelita-no-slop` | Menulis atau me-review kode apa pun |
-| `pelita-ui-empati` | Membuat atau mengubah halaman, komponen, teks UI |
+| `impeccable` | Membuat atau mengubah UI; skill dari https://github.com/pbakaus/impeccable |
+| `ui-ux-pro-max` | Referensi UI/UX dan pencarian sistem desain; skill dari https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | `pelita-verification` | Sebelum menyatakan tugas selesai, sebelum commit, di akhir fase |
 
 ## Aturan keras (tidak bisa ditawar)

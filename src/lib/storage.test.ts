@@ -6,7 +6,9 @@ import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   detectMimeType,
+  EvidenceTooLargeError,
   getMaxUploadBytes,
+  InvalidImageError,
   readEvidence,
   saveEvidence,
   deleteEvidence,
@@ -41,6 +43,20 @@ describe("detectMimeType", () => {
     expect(detectMimeType(Buffer.from("ini bukan gambar"))).toBeNull();
     expect(detectMimeType(Buffer.from("%PDF-1.7"))).toBe("application/pdf");
     expect(detectMimeType(Buffer.from([0x49, 0x44, 0x33, 0x04]))).toBe("audio/mpeg");
+  });
+
+  it("menolak HEIC/AVIF agar metadata GPS tidak lolos sebagai video", () => {
+    const ftyp = (brand: string) => {
+      const buffer = Buffer.alloc(24);
+      buffer.write("ftyp", 4, "ascii");
+      buffer.write(brand, 8, "ascii");
+      return buffer;
+    };
+
+    expect(detectMimeType(ftyp("heic"))).toBeNull();
+    expect(detectMimeType(ftyp("avif"))).toBeNull();
+    expect(detectMimeType(ftyp("mp42"))).toBe("video/mp4");
+    expect(detectMimeType(ftyp("M4A "))).toBe("audio/mp4");
   });
 });
 
@@ -79,6 +95,22 @@ describe("saveEvidence", () => {
     await expect(
       readEvidence(stored.storageKey, stored.iv, stored.authTag),
     ).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("menolak gambar yang hasil re-encode-nya melebihi batas upload", async () => {
+    const saved = process.env.MAX_UPLOAD_MB;
+    process.env.MAX_UPLOAD_MB = "0.00001";
+    await expect(saveEvidence(await makePng(), "image/png")).rejects.toBeInstanceOf(
+      EvidenceTooLargeError,
+    );
+    process.env.MAX_UPLOAD_MB = saved;
+  });
+
+  it("melempar InvalidImageError untuk berkas gambar korup", async () => {
+    const fakePng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+    await expect(saveEvidence(fakePng, "image/png")).rejects.toBeInstanceOf(
+      InvalidImageError,
+    );
   });
 });
 

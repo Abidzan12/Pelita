@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { ARTICLE_CATEGORY_LABELS } from "@/lib/labels";
 
@@ -36,6 +38,8 @@ export default async function ArticlePage({
       bodyMd: true,
       category: true,
       createdAt: true,
+      imageAlt: true,
+      imageStorageKey: true,
     },
   });
 
@@ -44,48 +48,74 @@ export default async function ArticlePage({
   }
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-10">
-      <Link
-        href="/edukasi"
-        className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
-      >
-        ← Semua artikel
-      </Link>
+    <div className="poster-page">
+      <section className="poster-masthead">
+        <div aria-hidden="true" className="poster-sun" />
+        <div className="relative z-[1] mx-auto max-w-4xl px-5 pt-8 pb-24 sm:px-8 sm:pt-10 lg:px-10">
+          <Link
+            href="/edukasi"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#f1c957] underline-offset-4 hover:underline"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            Semua artikel
+          </Link>
+          <h1 className="poster-title mt-3 max-w-3xl">{article.title}</h1>
+          <p className="poster-lead">{article.summary}</p>
+        </div>
+        <div className="hero-bottom-rule" aria-hidden="true">
+          <span />
+        </div>
+      </section>
 
-      <p className="mt-2 text-xs font-semibold tracking-wide text-primary uppercase">
-        {ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">{article.title}</h1>
-      <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
-        {article.summary}
-      </p>
+      <div className="mx-auto max-w-4xl px-4 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
+        <div className="poster-sheet">
+          <span className="poster-tab" aria-hidden="true">
+            Bacaan · {ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}
+          </span>
 
-      <div className="mt-6 border-t border-border pt-6">
-        <div className="text-[15px] leading-relaxed text-foreground [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/30 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_li]:my-1 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-4 [&_strong]:font-semibold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-5">
-          <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{article.bodyMd}</ReactMarkdown>
+          <div className="p-5 pt-8 sm:p-8 sm:pt-9 lg:p-10 lg:pt-10">
+            {article.imageStorageKey ? (
+              <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-[3px] border border-[#c7c9ba] bg-[#e6ede5]">
+                <Image
+                  src={`/api/articles/${slug}/image`}
+                  alt={article.imageAlt ?? ""}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  className="object-cover"
+                />
+              </div>
+            ) : null}
+
+            <div className="article-prose">
+              <ReactMarkdown rehypePlugins={[rehypeSanitize]}>
+                {article.bodyMd}
+              </ReactMarkdown>
+            </div>
+          </div>
+
+          <div className="poster-step-foot">
+            <div className="max-w-[46ch]">
+              <p className="font-extrabold text-[#183456]">
+                Butuh bicara dengan seseorang?
+              </p>
+              <p className="poster-note mt-1">
+                Kamu bisa memesan slot konseling anonim atau melihat kanal bantuan resmi.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/konseling"
+                className="poster-submit inline-flex items-center px-5 text-sm"
+              >
+                Lihat jadwal konseling
+              </Link>
+              <Link href="/darurat" className="poster-action">
+                Kontak darurat
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="mt-10 rounded-lg border border-primary/25 bg-secondary/50 p-4 text-sm leading-relaxed">
-        <p className="font-semibold">Butuh bicara dengan seseorang?</p>
-        <p className="mt-1 text-muted-foreground">
-          Kamu bisa memesan slot konseling anonim atau melihat kanal bantuan resmi.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-3">
-          <Link
-            href="/konseling"
-            className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            Lihat jadwal konseling
-          </Link>
-          <Link
-            href="/darurat"
-            className="inline-flex min-h-11 items-center rounded-md border border-border bg-background px-4 text-sm font-semibold hover:bg-muted"
-          >
-            Kontak darurat
-          </Link>
-        </div>
-      </div>
-    </article>
+    </div>
   );
 }

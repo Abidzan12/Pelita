@@ -1,6 +1,7 @@
 import argon2 from "argon2";
 import { NextResponse } from "next/server";
 import { verify as verifyTotp } from "otplib";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { loginSchema } from "@/lib/admin-validators";
 import {
   createSessionToken,
@@ -12,9 +13,9 @@ import {
 import { prisma } from "@/lib/db";
 import {
   clearFailures,
+  consumeFailureSlot,
   limitRequest,
-  peekFailures,
-  recordFailure,
+  releaseFailureSlot,
 } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
@@ -50,8 +51,14 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = await readJson(request);
+  } catch (error) {
+    if (error instanceof RequestTooLargeError) {
+      return NextResponse.json(
+        { ok: false, error: "Permintaan terlalu besar." },
+        { status: 413 },
+      );
+    }
     return NextResponse.json(
       { ok: false, error: "Permintaan tidak valid." },
       { status: 400 },
@@ -68,7 +75,13 @@ export async function POST(request: Request) {
 
   const { email, password, totp } = parsed.data;
 
-  const blocked = peekFailures("admin-login-account", email, ACCOUNT_FAILURE_LIMIT);
+  // Konsumsi slot sebelum await async agar burst request paralel tidak melewati batas 5 kali.
+  const blocked = consumeFailureSlot(
+    "admin-login-account",
+    email,
+    ACCOUNT_FAILURE_LIMIT,
+    ACCOUNT_WINDOW_MS,
+  );
   if (blocked.limited) {
     return NextResponse.json(
       { ok: false, error: "Terlalu banyak percobaan. Coba lagi nanti." },
@@ -86,12 +99,12 @@ export async function POST(request: Request) {
         passwordHash: true,
         active: true,
         totpSecret: true,
+        tokenVersion: true,
       },
     });
 
     if (!admin || !admin.active) {
       await argon2.verify(await dummyHash(), password);
-      recordFailure("admin-login-account", email, ACCOUNT_WINDOW_MS);
       return NextResponse.json({ ok: false, error: GENERIC_ERROR }, { status: 401 });
     }
 
@@ -100,12 +113,12 @@ export async function POST(request: Request) {
       .catch(() => false);
 
     if (!passwordValid) {
-      recordFailure("admin-login-account", email, ACCOUNT_WINDOW_MS);
       return NextResponse.json({ ok: false, error: GENERIC_ERROR }, { status: 401 });
     }
 
     if (admin.totpSecret) {
       if (!totp) {
+        releaseFailureSlot("admin-login-account", email);
         return NextResponse.json(
           { ok: false, error: "Masukkan kode 2FA.", totpRequired: true },
           { status: 401 },
@@ -113,7 +126,6 @@ export async function POST(request: Request) {
       }
       const totpResult = await verifyTotp({ secret: admin.totpSecret, token: totp });
       if (!totpResult.valid) {
-        recordFailure("admin-login-account", email, ACCOUNT_WINDOW_MS);
         return NextResponse.json(
           { ok: false, error: "Kode 2FA tidak valid." },
           { status: 401 },
@@ -123,7 +135,7 @@ export async function POST(request: Request) {
 
     clearFailures("admin-login-account", email);
 
-    const token = await createSessionToken(admin.id);
+    const token = await createSessionToken(admin.id, admin.tokenVersion);
     const response = NextResponse.json({
       ok: true,
       data: { name: admin.name, role: admin.role },

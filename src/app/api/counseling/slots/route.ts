@@ -9,6 +9,7 @@ export async function GET() {
       where: {
         startsAt: { gt: new Date() },
         booking: { is: null },
+        counselor: { active: true },
       },
       orderBy: { startsAt: "asc" },
       take: 50,

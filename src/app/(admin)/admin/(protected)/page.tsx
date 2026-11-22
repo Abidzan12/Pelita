@@ -1,10 +1,22 @@
 import Link from "next/link";
+import type { ReportStatus } from "@prisma/client";
+import { CheckCircle2, FileText, Inbox, LoaderCircle } from "lucide-react";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminStat } from "@/components/admin/AdminStat";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 import { getCurrentAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { ADMIN_ROLE_LABELS, CATEGORY_LABELS } from "@/lib/labels";
-import { StatusBadge } from "@/components/admin/StatusBadge";
+import { CATEGORY_LABELS, STATUS_LABELS } from "@/lib/labels";
 
 const dateFormatter = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" });
+
+const statusDot: Record<string, string> = {
+  DITERIMA: "bg-[#c9a53f]",
+  DIVERIFIKASI: "bg-[#7f9cb3]",
+  DALAM_PENANGANAN: "bg-[#163456]",
+  SELESAI: "bg-[#6f947c]",
+  DITOLAK: "bg-[#b34e3c]",
+};
 
 export default async function AdminDashboardPage() {
   const admin = await getCurrentAdmin();
@@ -40,68 +52,72 @@ export default async function AdminDashboardPage() {
     prisma.report.count({ where: isCounselor ? { assignedToId: admin.id } : {} }),
   ]);
 
-  const byStatus = new Map(statusCounts.map((row) => [row.status, row._count._all]));
+  const byStatus = new Map<ReportStatus, number>(
+    statusCounts.map((row) => [row.status, row._count._all]),
+  );
+  const sortedCategories = [...categoryCounts].sort(
+    (a, b) => b._count._all - a._count._all,
+  );
   const newCount = byStatus.get("DITERIMA") ?? 0;
   const handlingCount = byStatus.get("DALAM_PENANGANAN") ?? 0;
   const doneCount = byStatus.get("SELESAI") ?? 0;
+  const maxCategory = Math.max(1, ...sortedCategories.map((row) => row._count._all));
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            {ADMIN_ROLE_LABELS[admin.role] ?? admin.role}
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Dasbor</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {isCounselor
-              ? "Ringkasan laporan yang ditugaskan kepadamu."
-              : "Ringkasan laporan masuk tanpa menampilkan isi laporan."}
-          </p>
-        </div>
+    <div className="space-y-8">
+      <AdminPageHeader
+        title="Dasbor"
+        description={
+          isCounselor
+            ? "Ringkasan laporan yang ditugaskan kepadamu."
+            : "Ringkasan laporan masuk tanpa menampilkan isi laporan."
+        }
+      >
         <Link
           href="/admin/laporan"
-          className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
+          <FileText aria-hidden="true" className="size-4" />
           Lihat semua laporan
         </Link>
-      </div>
+      </AdminPageHeader>
 
       <section
         aria-label="Ringkasan angka"
-        className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
-        {[
-          { label: "Total laporan", value: total },
-          { label: "Baru diterima", value: newCount },
-          { label: "Dalam penanganan", value: handlingCount },
-          { label: "Selesai", value: doneCount },
-        ].map((item) => (
-          <div key={item.label} className="rounded-lg border border-border bg-card p-4">
-            <p className="text-sm text-muted-foreground">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold tabular-nums">{item.value}</p>
-          </div>
-        ))}
+        <AdminStat label="Total laporan" value={total} icon={FileText} />
+        <AdminStat label="Baru diterima" value={newCount} icon={Inbox} tone="new" />
+        <AdminStat
+          label="Dalam penanganan"
+          value={handlingCount}
+          icon={LoaderCircle}
+          tone="progress"
+        />
+        <AdminStat label="Selesai" value={doneCount} icon={CheckCircle2} tone="done" />
       </section>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <section
-          aria-labelledby="terbaru-heading"
-          className="rounded-lg border border-border bg-card"
-        >
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 id="terbaru-heading" className="font-semibold">
-              Laporan terbaru
-            </h2>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <section aria-labelledby="terbaru-heading" className="admin-card overflow-hidden">
+          <div className="admin-card-head">
+            <div>
+              <h2 id="terbaru-heading" className="font-semibold">
+                Laporan terbaru
+              </h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Lima laporan terakhir yang masuk.
+              </p>
+            </div>
             <Link
               href="/admin/laporan"
-              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+              className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
             >
-              Semua
+              Semua laporan
             </Link>
           </div>
+
           {recent.length === 0 ? (
-            <p className="px-4 py-8 text-sm text-muted-foreground">
+            <p className="px-5 py-12 text-center text-sm text-muted-foreground">
               Belum ada laporan yang masuk.
             </p>
           ) : (
@@ -110,7 +126,7 @@ export default async function AdminDashboardPage() {
                 <li key={report.id}>
                   <Link
                     href={`/admin/laporan/${report.id}`}
-                    className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 text-sm hover:bg-muted/50"
+                    className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-5 py-3.5 text-sm transition-colors hover:bg-muted/60"
                   >
                     <span className="font-mono text-xs text-muted-foreground">
                       #{report.id.slice(-6)}
@@ -129,31 +145,59 @@ export default async function AdminDashboardPage() {
           )}
         </section>
 
-        <section
-          aria-labelledby="kategori-heading"
-          className="rounded-lg border border-border bg-card p-4"
-        >
-          <h2 id="kategori-heading" className="font-semibold">
-            Per kategori
-          </h2>
-          {categoryCounts.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">Belum ada data.</p>
-          ) : (
-            <ul className="mt-3 space-y-2 text-sm">
-              {categoryCounts.map((row) => (
-                <li
-                  key={row.category}
-                  className="flex items-center justify-between gap-3"
-                >
-                  <span className="text-muted-foreground">
-                    {CATEGORY_LABELS[row.category] ?? row.category}
+        <div className="space-y-6">
+          <section aria-labelledby="kategori-heading" className="admin-card p-5">
+            <h2 id="kategori-heading" className="font-semibold">
+              Per kategori
+            </h2>
+            {categoryCounts.length === 0 ? (
+              <p className="mt-3 text-sm text-muted-foreground">Belum ada data.</p>
+            ) : (
+              <ul className="mt-4 space-y-3 text-sm">
+                {sortedCategories.map((row) => (
+                  <li key={row.category}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-muted-foreground">
+                        {CATEGORY_LABELS[row.category] ?? row.category}
+                      </span>
+                      <span className="font-semibold tabular-nums">
+                        {row._count._all}
+                      </span>
+                    </div>
+                    <div aria-hidden="true" className="mt-1.5 h-1.5 rounded-sm bg-muted">
+                      <div
+                        className="h-full rounded-sm bg-primary"
+                        style={{ width: `${(row._count._all / maxCategory) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section aria-labelledby="status-heading" className="admin-card p-5">
+            <h2 id="status-heading" className="font-semibold">
+              Status laporan
+            </h2>
+            <ul className="mt-4 space-y-2.5 text-sm">
+              {Object.entries(STATUS_LABELS).map(([key, label]) => (
+                <li key={key} className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <span
+                      aria-hidden="true"
+                      className={`size-2 rounded-full ${statusDot[key] ?? "bg-muted-foreground"}`}
+                    />
+                    {label}
                   </span>
-                  <span className="font-semibold tabular-nums">{row._count._all}</span>
+                  <span className="font-semibold tabular-nums">
+                    {byStatus.get(key as ReportStatus) ?? 0}
+                  </span>
                 </li>
               ))}
             </ul>
-          )}
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -11,12 +11,30 @@ const navigation = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-muted/40">
-      <div className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:grid-cols-[1.4fr_1fr]">
+    <footer className="site-footer">
+      <div className="mx-auto grid max-w-6xl gap-8 px-5 pt-10 pb-28 sm:grid-cols-[1.4fr_1fr] sm:px-8 sm:pb-10 lg:px-10">
         <div>
-          <p className="flex items-center gap-2 text-base font-semibold">
-            <span aria-hidden="true" className="size-2.5 rounded-full bg-primary" />
-            Pelita
+          <p className="flex items-center gap-2 text-base font-extrabold tracking-wide">
+            <svg
+              viewBox="0 0 40 40"
+              aria-hidden="true"
+              className="size-8 shrink-0 text-[#f1c957]"
+            >
+              <path d="M20 2 36 11v18L20 38 4 29V11L20 2Z" fill="currentColor" />
+              <path
+                d="M20 10v11m0 0 7-4m-7 4-7-4m7 4v8"
+                fill="none"
+                stroke="#183456"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle cx="20" cy="10" r="2.5" fill="#ee8064" />
+              <circle cx="13" cy="17" r="2" fill="#183456" />
+              <circle cx="27" cy="17" r="2" fill="#183456" />
+              <circle cx="20" cy="29" r="2" fill="#ee8064" />
+            </svg>
+            PELITA
           </p>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
             Ruang aman untuk melaporkan kekerasan seksual dan perundungan di lingkungan
@@ -34,7 +52,7 @@ export function SiteFooter() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="inline-flex min-h-11 items-center text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                  className="footer-nav-link inline-flex min-h-11 items-center underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                 >
                   {item.label}
                 </Link>

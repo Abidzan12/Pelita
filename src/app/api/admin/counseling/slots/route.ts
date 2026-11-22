@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { jsonError, rejectCrossOrigin, requireAdmin } from "@/lib/admin-api";
 import { counselingSlotCreateSchema } from "@/lib/admin-validators";
 import { prisma } from "@/lib/db";
@@ -44,9 +45,11 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return jsonError("Permintaan tidak valid.", 400);
+    body = await readJson(request);
+  } catch (error) {
+    return error instanceof RequestTooLargeError
+      ? jsonError("Permintaan terlalu besar.", 413)
+      : jsonError("Permintaan tidak valid.", 400);
   }
 
   const parsed = counselingSlotCreateSchema.safeParse(body);

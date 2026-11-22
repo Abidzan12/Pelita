@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { toBytes } from "@/lib/bytes";
 import { encrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/db";
@@ -20,8 +21,14 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = await readJson(request);
+  } catch (error) {
+    if (error instanceof RequestTooLargeError) {
+      return NextResponse.json(
+        { ok: false, error: "Permintaan terlalu besar." },
+        { status: 413 },
+      );
+    }
     return NextResponse.json(
       { ok: false, error: "Permintaan tidak valid." },
       { status: 400 },
@@ -37,13 +44,39 @@ export async function POST(request: Request) {
   }
 
   try {
-    const slot = await prisma.counselingSlot.findFirst({
-      where: {
-        id: parsed.data.slotId,
-        startsAt: { gt: new Date() },
-        booking: { is: null },
-      },
-      select: { id: true, startsAt: true, endsAt: true, mode: true },
+    const bookingCode = generateBookingCode();
+    const contact = parsed.data.contact?.trim() || null;
+    const encrypted = contact ? encrypt(contact) : null;
+
+    const slot = await prisma.$transaction(async (tx) => {
+      // Kunci baris slot agar tidak bertabrakan dengan PATCH/DELETE konselor.
+      await tx.$queryRaw`SELECT id FROM "CounselingSlot" WHERE id = ${parsed.data.slotId} FOR UPDATE`;
+      const available = await tx.counselingSlot.findFirst({
+        where: {
+          id: parsed.data.slotId,
+          startsAt: { gt: new Date() },
+          booking: { is: null },
+          counselor: { active: true },
+        },
+        select: { id: true, startsAt: true, endsAt: true, mode: true },
+      });
+
+      if (!available) {
+        return null;
+      }
+
+      await tx.counselingBooking.create({
+        data: {
+          slotId: available.id,
+          bookingHash: hashBookingCode(bookingCode),
+          aliasName: parsed.data.aliasName?.trim() || null,
+          contactEnc: encrypted ? toBytes(encrypted.ciphertext) : null,
+          contactIv: encrypted ? toBytes(encrypted.iv) : null,
+          contactTag: encrypted ? toBytes(encrypted.tag) : null,
+        },
+      });
+
+      return available;
     });
 
     if (!slot) {
@@ -52,21 +85,6 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
-
-    const bookingCode = generateBookingCode();
-    const contact = parsed.data.contact?.trim() || null;
-    const encrypted = contact ? encrypt(contact) : null;
-
-    await prisma.counselingBooking.create({
-      data: {
-        slotId: slot.id,
-        bookingHash: hashBookingCode(bookingCode),
-        aliasName: parsed.data.aliasName?.trim() || null,
-        contactEnc: encrypted ? toBytes(encrypted.ciphertext) : null,
-        contactIv: encrypted ? toBytes(encrypted.iv) : null,
-        contactTag: encrypted ? toBytes(encrypted.tag) : null,
-      },
-    });
 
     return NextResponse.json(
       {

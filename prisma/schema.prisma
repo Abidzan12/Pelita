@@ -96,6 +96,7 @@ model Admin {
   passwordHash String
   role         AdminRole
   totpSecret   String?
+  tokenVersion Int              @default(0)
   active       Boolean          @default(true)
   reports      Report[]
   slots        CounselingSlot[]
@@ -113,16 +114,16 @@ model CounselingSlot {
 }
 
 model CounselingBooking {
-  id          String   @id @default(cuid())
-  slotId      String   @unique
+  id          String         @id @default(cuid())
+  slotId      String         @unique
   slot        CounselingSlot @relation(fields: [slotId], references: [id])
-  bookingHash String   @unique
+  bookingHash String         @unique
   aliasName   String?
   contactEnc  Bytes?
   contactIv   Bytes?
   contactTag  Bytes?
-  status      String   @default("DIJADWALKAN")
-  createdAt   DateTime @default(now())
+  status      String         @default("DIJADWALKAN")
+  createdAt   DateTime       @default(now())
 }
 
 model HazardPoint {
@@ -136,14 +137,20 @@ model HazardPoint {
 }
 
 model Article {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  title     String
-  summary   String
-  bodyMd    String
-  category  String
-  published Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  summary         String
+  bodyMd          String
+  category        String
+  published       Boolean  @default(false)
+  imageStorageKey String?  @unique
+  imageMimeType   String?
+  imageSizeBytes  Int?
+  imageIv         Bytes?
+  imageAuthTag    Bytes?
+  imageAlt        String?
+  createdAt       DateTime @default(now())
 }
 
 model AuditLog {

@@ -3,9 +3,9 @@ import type { NextConfig } from "next";
 const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js menyisipkan skrip hidrasi inline; nonce akan ditambahkan saat hardening.
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV !== "production" ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tile.openstreetmap.org",
+  "img-src 'self' data: blob:",
   "font-src 'self'",
   "connect-src 'self'",
   "object-src 'none'",
@@ -27,6 +27,8 @@ const noStore = [{ key: "Cache-Control", value: "no-store, max-age=0" }];
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Badge dev tools menutupi tombol "Tanya PELITA" di kiri bawah saat demo.
+  devIndicators: false,
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

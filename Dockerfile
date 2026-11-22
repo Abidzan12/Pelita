@@ -21,7 +21,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.ts ./next.config.ts
-RUN mkdir -p /app/storage/evidence && chown -R node:node /app
+RUN mkdir -p /app/storage/evidence /app/storage/article-images && chown -R node:node /app
 USER node
 EXPOSE 3000
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

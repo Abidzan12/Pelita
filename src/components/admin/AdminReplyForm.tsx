@@ -46,7 +46,7 @@ export function AdminReplyForm({ reportId }: { reportId: string }) {
   }
 
   return (
-    <form onSubmit={sendReply} className="mt-4">
+    <form onSubmit={sendReply} className="mt-5 border-t border-border pt-4">
       <Label htmlFor="reply">Balas pelapor</Label>
       <Textarea
         id="reply"
@@ -55,7 +55,7 @@ export function AdminReplyForm({ reportId }: { reportId: string }) {
         rows={3}
         maxLength={2000}
         placeholder="Tulis balasan yang empatik dan jelas. Jangan meminta identitas yang tidak diperlukan."
-        className="mt-2 bg-card"
+        className="mt-2 bg-background"
       />
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">

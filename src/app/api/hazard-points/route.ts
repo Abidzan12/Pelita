@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { prisma } from "@/lib/db";
 import { limitRequest } from "@/lib/ratelimit";
 import { hazardPointSchema } from "@/lib/validators";
@@ -38,8 +39,14 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = await readJson(request);
+  } catch (error) {
+    if (error instanceof RequestTooLargeError) {
+      return NextResponse.json(
+        { ok: false, error: "Permintaan terlalu besar." },
+        { status: 413 },
+      );
+    }
     return NextResponse.json(
       { ok: false, error: "Permintaan tidak valid." },
       { status: 400 },

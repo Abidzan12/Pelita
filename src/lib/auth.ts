@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { AdminRole } from "@prisma/client";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
@@ -5,6 +6,8 @@ import { prisma } from "./db";
 
 export const SESSION_COOKIE = "pelita_session";
 export const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60;
+const JWT_ISSUER = "pelita";
+const JWT_AUDIENCE = "pelita-admin";
 
 export type SessionAdmin = {
   id: string;
@@ -25,10 +28,16 @@ function sessionKey(): Uint8Array {
   return new Uint8Array(key);
 }
 
-export async function createSessionToken(adminId: string): Promise<string> {
-  return new SignJWT({})
+export async function createSessionToken(
+  adminId: string,
+  tokenVersion = 0,
+): Promise<string> {
+  return new SignJWT({ ver: tokenVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(adminId)
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE)
+    .setJti(randomUUID())
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_SECONDS}s`)
     .sign(sessionKey());
@@ -52,15 +61,26 @@ export async function getCurrentAdmin(): Promise<SessionAdmin | null> {
   }
 
   try {
-    const { payload } = await jwtVerify(token, sessionKey(), { algorithms: ["HS256"] });
-    if (!payload.sub) {
+    const { payload } = await jwtVerify(token, sessionKey(), {
+      algorithms: ["HS256"],
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    });
+    if (!payload.sub || typeof payload.ver !== "number") {
       return null;
     }
     const admin = await prisma.admin.findUnique({
       where: { id: payload.sub },
-      select: { id: true, name: true, email: true, role: true, active: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        active: true,
+        tokenVersion: true,
+      },
     });
-    if (!admin?.active) {
+    if (!admin?.active || admin.tokenVersion !== payload.ver) {
       return null;
     }
     return {
@@ -72,6 +92,13 @@ export async function getCurrentAdmin(): Promise<SessionAdmin | null> {
   } catch {
     return null;
   }
+}
+
+export async function revokeAdminSessions(adminId: string): Promise<void> {
+  await prisma.admin.update({
+    where: { id: adminId },
+    data: { tokenVersion: { increment: 1 } },
+  });
 }
 
 export function isSameOrigin(request: Request): boolean {

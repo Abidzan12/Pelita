@@ -38,8 +38,25 @@ export const HAZARD_CATEGORY_LABELS: Record<string, string> = {
   LAINNYA: "Lainnya",
 };
 
+// Kategori titik hasil survei tim tidak memakai skema HazardPoint.
+export const HAZARD_PLACE_LABELS: Record<string, string> = {
+  PARKIRAN: "Area parkir",
+  KANTIN: "Kantin & foodcourt",
+  GEDUNG: "Gedung & koridor",
+};
+
+export function hazardCategoryLabel(category: string): string {
+  return HAZARD_CATEGORY_LABELS[category] ?? HAZARD_PLACE_LABELS[category] ?? category;
+}
+
 export const MODERATION_LABELS: Record<string, string> = {
   PENDING: "Menunggu moderasi",
   APPROVED: "Disetujui",
   REJECTED: "Ditolak",
+};
+
+export const BOOKING_STATUS_LABELS: Record<string, string> = {
+  DIJADWALKAN: "Dijadwalkan",
+  SELESAI: "Selesai",
+  DIBATALKAN: "Dibatalkan",
 };

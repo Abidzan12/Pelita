@@ -18,8 +18,10 @@ Set `APP_URL` ke alamat publik yang dipakai, misalnya `https://pelita.example.or
 Nilai ini dipakai untuk pemeriksaan Origin (CSRF) pada endpoint admin. Jika memakai
 port lain, ubah juga pemetaan port di `docker-compose.yml`.
 
-Jika `POSTGRES_PASSWORD` diubah, pastikan `DATABASE_URL` untuk pengembangan lokal
-juga memakai password yang sama.
+Jika `POSTGRES_PASSWORD` diubah (wajib sebelum deploy di server publik), pastikan
+`DATABASE_URL` untuk pengembangan lokal juga memakai password yang sama. Port
+`3000` dan `5433` pada `docker-compose.yml` diikat ke `127.0.0.1` agar hanya dapat
+diakses dari host lokal/reverse proxy.
 
 ## 2. Jalankan
 
@@ -55,6 +57,7 @@ server {
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
@@ -64,15 +67,19 @@ server {
         access_log off;
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-Aplikasi hanya memakai `X-Forwarded-For` untuk hash rate limit di memori; nilai
-mentahnya tidak disimpan. Pastikan log reverse proxy untuk rute di atas dimatikan
-agar IP pelapor tidak tercatat.
+Aplikasi memakai `X-Real-IP` (atau entri terakhir `X-Forwarded-For`) hanya untuk
+hash rate limit di memori; nilai mentahnya tidak disimpan. Proxy **wajib**
+menimpa `X-Real-IP` dengan `$remote_addr`; tanpa itu klien bisa memalsukan
+header dan melewati batas per-klien (masih ada batas global sebagai penahan).
+Pastikan log reverse proxy untuk rute di atas dimatikan agar IP pelapor tidak
+tercatat.
 
 ## 5. Memperbarui
 
@@ -88,6 +95,6 @@ Migrasi Prisma dijalankan otomatis oleh container `app`.
 - Enkripsi adalah enkripsi di sisi server, bukan enkripsi ujung ke ujung.
 - CSP masih mengizinkan skrip inline milik Next.js.
 - Rate limit disimpan di memori per instance.
-- Ubin peta dimuat dari OpenStreetMap hanya di halaman `/peta`.
-- Login admin memakai sesi cookie 8 jam; 2FA tersedia di skema tetapi belum ada
+- Peta memakai denah statis lokal di halaman `/peta`.
+- Login admin memakai sesi cookie 8 jam dengan pencabutan sisi server saat logout (`tokenVersion`); 2FA tersedia di skema tetapi belum ada
   halaman pengaturan 2FA.

@@ -19,10 +19,18 @@ export async function GET(request: Request) {
         title: true,
         summary: true,
         category: true,
+        imageAlt: true,
+        imageStorageKey: true,
         createdAt: true,
       },
     });
-    return NextResponse.json({ ok: true, data: articles });
+    return NextResponse.json({
+      ok: true,
+      data: articles.map(({ imageStorageKey, ...article }) => ({
+        ...article,
+        imageUrl: imageStorageKey ? `/api/articles/${article.slug}/image` : null,
+      })),
+    });
   } catch {
     return NextResponse.json(
       { ok: false, error: "Artikel belum bisa dimuat." },

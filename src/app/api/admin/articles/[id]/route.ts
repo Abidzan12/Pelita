@@ -1,7 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { jsonError, rejectCrossOrigin, requireAdmin } from "@/lib/admin-api";
-import { articleSchema } from "@/lib/admin-validators";
+import { deleteArticleImage, ARTICLE_IMAGE_MAX_BYTES } from "@/lib/article-image";
+import { parseArticleForm } from "@/lib/article-upload";
+import { readFormData, RequestTooLargeError } from "@/lib/request-body";
 import { writeAuditLog } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -23,40 +25,81 @@ export async function PATCH(
 
   const { id } = await params;
 
-  let body: unknown;
+  let existing: { id: string; imageStorageKey: string | null } | null;
   try {
-    body = await request.json();
-  } catch {
-    return jsonError("Permintaan tidak valid.", 400);
-  }
-
-  const parsed = articleSchema.safeParse(body);
-  if (!parsed.success) {
-    return jsonError(parsed.error.issues[0]?.message ?? "Data artikel tidak valid.", 400);
-  }
-
-  try {
-    const existing = await prisma.article.findUnique({
+    existing = await prisma.article.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, imageStorageKey: true },
     });
-    if (!existing) {
-      return jsonError("Artikel tidak ditemukan.", 404);
-    }
+  } catch {
+    return jsonError("Artikel belum bisa disimpan.", 500);
+  }
+  if (!existing) {
+    return jsonError("Artikel tidak ditemukan.", 404);
+  }
 
-    const article = await prisma.article.update({
+  let form: FormData;
+  try {
+    form = await readFormData(request, ARTICLE_IMAGE_MAX_BYTES + 1024 * 1024);
+  } catch (error) {
+    return error instanceof RequestTooLargeError
+      ? jsonError("Berkas yang dikirim terlalu besar.", 413)
+      : jsonError("Permintaan tidak valid.", 400);
+  }
+
+  let parsed: Awaited<ReturnType<typeof parseArticleForm>>;
+  try {
+    parsed = await parseArticleForm(form);
+  } catch {
+    return jsonError("Gambar belum bisa diproses. Coba berkas gambar lain.", 400);
+  }
+  if (!parsed.ok) {
+    return jsonError(parsed.error, 400);
+  }
+
+  const { image, removeImage, data } = parsed.value;
+  if (existing.imageStorageKey && !image && !removeImage && !data.imageAlt) {
+    return jsonError("Tambahkan deskripsi singkat untuk gambar.", 400);
+  }
+  let article: { id: string; slug: string };
+  try {
+    article = await prisma.article.update({
       where: { id },
-      data: parsed.data,
+      data: {
+        ...data,
+        ...(image
+          ? {
+              imageStorageKey: image.storageKey,
+              imageMimeType: image.mimeType,
+              imageSizeBytes: image.sizeBytes,
+              imageIv: Uint8Array.from(image.iv),
+              imageAuthTag: Uint8Array.from(image.authTag),
+            }
+          : removeImage
+            ? {
+                imageStorageKey: null,
+                imageMimeType: null,
+                imageSizeBytes: null,
+                imageIv: null,
+                imageAuthTag: null,
+              }
+            : {}),
+      },
       select: { id: true, slug: true },
     });
-    await writeAuditLog(auth.admin.id, "UPDATE_ARTICLE", article.id);
-    return NextResponse.json({ ok: true, data: article });
   } catch (error) {
+    if (image) await deleteArticleImage(image.storageKey);
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return jsonError("Slug sudah dipakai artikel lain.", 409);
     }
     return jsonError("Artikel belum bisa disimpan.", 500);
   }
+
+  await writeAuditLog(auth.admin.id, "UPDATE_ARTICLE", article.id);
+  if ((image || removeImage) && existing.imageStorageKey) {
+    await deleteArticleImage(existing.imageStorageKey);
+  }
+  return NextResponse.json({ ok: true, data: article });
 }
 
 export async function DELETE(
@@ -75,18 +118,22 @@ export async function DELETE(
 
   const { id } = await params;
 
+  let existing: { id: string; imageStorageKey: string | null } | null;
   try {
-    const existing = await prisma.article.findUnique({
+    existing = await prisma.article.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, imageStorageKey: true },
     });
     if (!existing) {
       return jsonError("Artikel tidak ditemukan.", 404);
     }
     await prisma.article.delete({ where: { id } });
-    await writeAuditLog(auth.admin.id, "DELETE_ARTICLE", id);
-    return NextResponse.json({ ok: true });
   } catch {
     return jsonError("Artikel belum bisa dihapus.", 500);
   }
+  await writeAuditLog(auth.admin.id, "DELETE_ARTICLE", id);
+  if (existing.imageStorageKey) {
+    await deleteArticleImage(existing.imageStorageKey);
+  }
+  return NextResponse.json({ ok: true });
 }

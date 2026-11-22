@@ -1,10 +1,19 @@
 import { expect, type APIRequestContext } from "@playwright/test";
 
+// Rate limit disimpan di memori dan dikunci per IP. Header ini membuat tiap
+// permintaan dihitung sebagai klien berbeda agar suite bisa dijalankan ulang.
+export function testClientHeaders(): Record<string, string> {
+  const third = Math.floor(Math.random() * 250) + 1;
+  const fourth = Math.floor(Math.random() * 250) + 1;
+  return { "x-forwarded-for": `198.18.${third}.${fourth}` };
+}
+
 export async function createReport(
   request: APIRequestContext,
   description: string,
 ): Promise<string> {
   const response = await request.post("/api/reports", {
+    headers: testClientHeaders(),
     multipart: {
       reporterRole: "SAKSI",
       category: "PERUNDUNGAN",
@@ -28,6 +37,7 @@ export async function lookupTicket(
   ticket: string,
 ): Promise<TicketLookup> {
   const response = await request.post("/api/tickets/lookup", {
+    headers: testClientHeaders(),
     data: { ticket },
   });
   expect(response.status()).toBe(200);

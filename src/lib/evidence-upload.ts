@@ -2,7 +2,9 @@ import { MAX_EVIDENCE_PER_REPORT } from "./evidence-limits";
 import {
   deleteEvidence,
   detectMimeType,
+  EvidenceTooLargeError,
   getMaxUploadBytes,
+  InvalidImageError,
   saveEvidence,
   type StoredEvidence,
 } from "./storage";
@@ -53,7 +55,7 @@ export async function collectEvidence(
         return {
           ok: false,
           error:
-            "Jenis berkas tidak didukung. Gunakan gambar JPG/PNG/WebP, PDF, MP3, atau MP4.",
+            "Jenis berkas tidak didukung. Gunakan gambar JPG/PNG/WebP, PDF, MP3, atau MP4. Foto HEIC dari iPhone perlu diubah ke JPG dulu.",
         };
       }
       stored.push(await saveEvidence(buffer, mimeType));
@@ -61,6 +63,9 @@ export async function collectEvidence(
     return { ok: true, stored };
   } catch (error) {
     await discard(stored);
+    if (error instanceof EvidenceTooLargeError || error instanceof InvalidImageError) {
+      return { ok: false, error: error.message };
+    }
     throw error;
   }
 }

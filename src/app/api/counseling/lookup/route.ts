@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { prisma } from "@/lib/db";
 import { limitRequest } from "@/lib/ratelimit";
 import { hashBookingCode } from "@/lib/ticket";
@@ -29,8 +30,11 @@ export async function POST(request: Request) {
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
+    body = await readJson(request);
+  } catch (error) {
+    if (error instanceof RequestTooLargeError) {
+      return respond({ ok: false, error: "Permintaan terlalu besar." }, 413, startedAt);
+    }
     return respond(NOT_FOUND, 404, startedAt);
   }
 

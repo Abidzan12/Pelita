@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { readJson, RequestTooLargeError } from "@/lib/request-body";
 import { jsonError, rejectCrossOrigin, requireAdmin } from "@/lib/admin-api";
 import { reportAssignSchema } from "@/lib/admin-validators";
 import { writeAuditLog } from "@/lib/auth";
@@ -24,9 +25,11 @@ export async function PATCH(
 
   let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return jsonError("Permintaan tidak valid.", 400);
+    body = await readJson(request);
+  } catch (error) {
+    return error instanceof RequestTooLargeError
+      ? jsonError("Permintaan terlalu besar.", 413)
+      : jsonError("Permintaan tidak valid.", 400);
   }
 
   const parsed = reportAssignSchema.safeParse(body);

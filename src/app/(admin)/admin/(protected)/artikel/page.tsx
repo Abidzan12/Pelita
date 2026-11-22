@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Plus } from "lucide-react";
+import { AdminArticleDeleteButton } from "@/components/admin/AdminArticleDeleteButton";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { getCurrentAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ARTICLE_CATEGORY_LABELS } from "@/lib/labels";
@@ -28,49 +31,45 @@ export default async function AdminArticlesPage() {
   });
 
   return (
-    <div>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Artikel edukasi</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Artikel terbit tampil di halaman edukasi publik.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Artikel edukasi"
+        description="Artikel terbit tampil di halaman edukasi publik."
+      >
         <Link
           href="/admin/artikel/baru"
-          className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
         >
+          <Plus aria-hidden="true" className="size-4" />
           Tulis artikel
         </Link>
-      </div>
+      </AdminPageHeader>
 
       {articles.length === 0 ? (
-        <p className="mt-6 rounded-lg border border-dashed border-border p-8 text-sm text-muted-foreground">
-          Belum ada artikel. Mulai dengan menulis artikel baru.
-        </p>
+        <div className="admin-empty">
+          <p className="font-medium">Belum ada artikel.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Mulai dengan menulis artikel baru.
+          </p>
+        </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-card">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-border bg-muted/50 text-xs text-muted-foreground">
+        <div className="admin-card overflow-x-auto">
+          <table className="admin-table min-w-[640px]">
+            <thead>
               <tr>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Judul
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Kategori
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Status
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Dibuat
+                <th scope="col">Judul</th>
+                <th scope="col">Kategori</th>
+                <th scope="col">Status</th>
+                <th scope="col">Dibuat</th>
+                <th scope="col" className="text-right">
+                  Aksi
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {articles.map((article) => (
-                <tr key={article.id} className="hover:bg-muted/40">
-                  <td className="px-4 py-3">
+                <tr key={article.id}>
+                  <td>
                     <Link
                       href={`/admin/artikel/${article.id}`}
                       className="font-medium text-primary underline-offset-4 hover:underline"
@@ -81,22 +80,26 @@ export default async function AdminArticlesPage() {
                       /{article.slug}
                     </p>
                   </td>
-                  <td className="px-4 py-3">
-                    {ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}
-                  </td>
-                  <td className="px-4 py-3">
+                  <td>{ARTICLE_CATEGORY_LABELS[article.category] ?? article.category}</td>
+                  <td>
                     {article.published ? (
-                      <span className="rounded-md border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                      <span className="inline-flex items-center rounded-md border border-[#8fae9b] bg-[#e7f0e8] px-2 py-0.5 text-xs font-semibold text-[#2c4a3d]">
                         Terbit
                       </span>
                     ) : (
-                      <span className="rounded-md border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      <span className="inline-flex items-center rounded-md border border-border bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                         Draf
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                  <td className="text-xs whitespace-nowrap text-muted-foreground">
                     {dateFormatter.format(article.createdAt)}
+                  </td>
+                  <td className="text-right whitespace-nowrap">
+                    <AdminArticleDeleteButton
+                      articleId={article.id}
+                      articleTitle={article.title}
+                    />
                   </td>
                 </tr>
               ))}
