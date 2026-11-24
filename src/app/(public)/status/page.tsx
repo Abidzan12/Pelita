@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Paperclip, ShieldCheck, X } from "lucide-react";
+import { Check, Clock, Paperclip, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import statusEstimates from "@/data/status-estimates.json";
 import { MAX_EVIDENCE_PER_REPORT, DEFAULT_MAX_UPLOAD_MB } from "@/lib/evidence-limits";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,9 @@ const statusLabels: Record<string, string> = {
   DITOLAK: "Ditolak",
 };
 
-const statusSteps = ["DITERIMA", "DIVERIFIKASI", "DALAM_PENANGANAN", "SELESAI"];
+const statusSteps = ["DITERIMA", "DIVERIFIKASI", "DALAM_PENANGANAN", "SELESAI"] as const;
+
+type EstimateStepKey = (typeof statusSteps)[number];
 
 const categoryLabels: Record<string, string> = {
   KEKERASAN_SEKSUAL: "Kekerasan seksual",
@@ -436,7 +439,14 @@ export default function StatusPage() {
 
   const status = data?.status ?? "DITERIMA";
   const rejected = status === "DITOLAK";
-  const currentStep = statusSteps.indexOf(status);
+  const currentStep = statusSteps.indexOf(status as EstimateStepKey);
+  const currentEstimate =
+    currentStep >= 0 ? statusEstimates.steps[statusSteps[currentStep]] : null;
+  const nextStepKey: EstimateStepKey | null =
+    currentStep >= 0 && currentStep < statusSteps.length - 1
+      ? statusSteps[currentStep + 1]
+      : null;
+  const nextEstimate = nextStepKey ? statusEstimates.steps[nextStepKey] : null;
   const evidenceCount = data?.evidenceCount ?? 0;
 
   return (
@@ -489,30 +499,53 @@ export default function StatusPage() {
                   kanal resmi untuk penjelasan lebih lanjut.
                 </p>
               ) : (
-                <ol className="status-rail">
-                  {statusSteps.map((step, index) => {
-                    const isCurrent = index === currentStep;
-                    const isDone = index < currentStep;
-                    return (
-                      <li
-                        key={step}
-                        aria-current={isCurrent ? "step" : undefined}
-                        data-state={isCurrent ? "current" : isDone ? "done" : "next"}
-                        className="status-step"
-                      >
-                        <span aria-hidden="true" className="status-dot">
-                          {isDone ? <Check className="size-3.5" /> : index + 1}
-                        </span>
-                        <span>
-                          <span className="status-label block">{statusLabels[step]}</span>
-                          <span className="status-caption block">
-                            {isDone ? "Sudah lewat" : isCurrent ? "Sedang di sini" : "Menunggu"}
+                <>
+                  <ol className="status-rail">
+                    {statusSteps.map((step, index) => {
+                      const isCurrent = index === currentStep;
+                      const isDone = index < currentStep;
+                      const stepInfo = statusEstimates.steps[step];
+                      return (
+                        <li
+                          key={step}
+                          aria-current={isCurrent ? "step" : undefined}
+                          data-state={isCurrent ? "current" : isDone ? "done" : "next"}
+                          className="status-step"
+                        >
+                          <span aria-hidden="true" className="status-dot">
+                            {isDone ? <Check className="size-3.5" /> : index + 1}
                           </span>
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ol>
+                          <span>
+                            <span className="status-label block">{statusLabels[step]}</span>
+                            <span className="status-caption block">
+                              {isDone
+                                ? "Sudah lewat"
+                                : isCurrent
+                                  ? "Sedang di sini"
+                                  : "Menunggu"}
+                            </span>
+                            <span className="mt-1 block text-xs font-medium text-[#465460]">
+                              {stepInfo.estimate}
+                            </span>
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+
+                  {currentEstimate ? (
+                    <div className="poster-panel mt-5 space-y-1.5 text-sm leading-relaxed text-[#465460]">
+                      <p className="flex items-center gap-2 font-bold text-[#183456]">
+                        <Clock aria-hidden="true" className="size-4 shrink-0 text-[#b34e3c]" />
+                        {nextEstimate
+                          ? `Tahap berikutnya (${statusLabels[nextStepKey!]}): ${nextEstimate.estimate}`
+                          : `Tahap ${statusLabels[status]}: ${currentEstimate.estimate}`}
+                      </p>
+                      <p>{nextEstimate ? nextEstimate.detail : currentEstimate.detail}</p>
+                      <p className="text-xs text-[#5c6660]">{statusEstimates.disclaimer}</p>
+                    </div>
+                  ) : null}
+                </>
               )}
             </div>
           </section>

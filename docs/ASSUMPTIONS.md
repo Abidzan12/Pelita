@@ -50,6 +50,11 @@ Setiap asumsi harus bisa dijelaskan saat presentasi.
 
 - Nomor/kanal kontak darurat, koordinat kampus, dan akun seed diisi dengan
   placeholder `ISI_OLEH_TIM`. Agent tidak mengarang data tersebut.
+- Perkiraan waktu verifikasi (`1–2 hari kerja`) dan pemrosesan (`2–5 hari kerja`) pada
+  `src/data/status-estimates.json` (tampil di `/lapor/berhasil` dan `/status`)
+  merupakan perkiraan umum sementara untuk keperluan demo, **bukan** SLA resmi Satgas
+  PPKS UNY, dan disertai keterangan disclaimer di UI. Tim dapat menggantinya dengan
+  ketentuan resmi bila tersedia.
 
 ## Admin & seed
 

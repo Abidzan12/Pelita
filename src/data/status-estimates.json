@@ -1,0 +1,23 @@
+{
+  "isDemoEstimate": true,
+  "catatan": "Perkiraan umum sementara untuk demo prototipe (bukan SLA resmi Satgas PPKS UNY). Perbarui nilai di file ini jika sudah ada kebijakan resmi.",
+  "disclaimer": "Angka di atas adalah perkiraan umum untuk demo, bukan batas waktu resmi Satgas PPKS UNY. Waktu nyata dapat berbeda sesuai urgensi dan beban kasus.",
+  "steps": {
+    "DITERIMA": {
+      "estimate": "Tercatat langsung",
+      "detail": "Laporanmu sudah tersimpan terenkripsi dan menunggu pemeriksaan awal oleh petugas."
+    },
+    "DIVERIFIKASI": {
+      "estimate": "Perkiraan 1–2 hari kerja",
+      "detail": "Petugas meninjau kelengkapan awal laporan sebelum masuk ke tahap penanganan."
+    },
+    "DALAM_PENANGANAN": {
+      "estimate": "Perkiraan 2–5 hari kerja",
+      "detail": "Satgas PPKS mulai memproses laporan dan dapat menghubungimu lewat chat anonim di halaman ini."
+    },
+    "SELESAI": {
+      "estimate": "Sesuai penyelesaian",
+      "detail": "Penanganan laporan selesai. Kamu tetap dapat membaca riwayat pesan dengan tiketmu."
+    }
+  }
+}

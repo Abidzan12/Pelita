@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, Check, Copy, Download } from "lucide-react";
+import { AlertTriangle, Check, Clock, Copy, Download } from "lucide-react";
 import { useState } from "react";
 import { useTicketReceipt } from "@/components/TicketReceipt";
+import statusEstimates from "@/data/status-estimates.json";
 
 function TicketArt() {
   return (
@@ -284,6 +285,28 @@ export default function ReportSuccessPage() {
                 Halaman ini tidak menyimpan tiket di URL, cookie, atau penyimpanan
                 browser. Jika kamu menutup halaman sebelum menyimpannya, tiket akan
                 hilang. Simpan di tempat aman, bukan di perangkat yang dipakai bersama.
+              </p>
+            </div>
+
+            <div className="poster-panel mt-4">
+              <p className="flex items-center gap-2 text-sm font-extrabold text-[#183456]">
+                <Clock aria-hidden="true" className="size-4 shrink-0 text-[#b34e3c]" />
+                Perkiraan proses laporan
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-[#465460]">
+                <li>
+                  <strong className="text-[#183456]">Verifikasi awal:</strong>{" "}
+                  {statusEstimates.steps.DIVERIFIKASI.estimate} —{" "}
+                  {statusEstimates.steps.DIVERIFIKASI.detail}
+                </li>
+                <li>
+                  <strong className="text-[#183456]">Pemrosesan laporan:</strong>{" "}
+                  {statusEstimates.steps.DALAM_PENANGANAN.estimate} —{" "}
+                  {statusEstimates.steps.DALAM_PENANGANAN.detail}
+                </li>
+              </ul>
+              <p className="mt-2 text-xs leading-relaxed text-[#5c6660]">
+                {statusEstimates.disclaimer}
               </p>
             </div>
 
