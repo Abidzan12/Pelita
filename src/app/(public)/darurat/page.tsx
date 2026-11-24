@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail, Phone } from "lucide-react";
 import emergencyContacts from "@/data/emergency-contacts.json";
 
 export const metadata: Metadata = {
@@ -103,18 +103,49 @@ export default function EmergencyPage() {
             <div className="poster-step-body">
               <ul className="border-t border-[#c7c9ba]">
                 {emergencyContacts.contacts.map((contact) => {
-                  const channel = contact.channel.trim();
-                  const filled = channel.length > 0 && channel !== PLACEHOLDER;
+                  const activeChannels = contact.channels.filter((item) => {
+                    const value = item.value.trim();
+                    return value.length > 0 && value !== PLACEHOLDER;
+                  });
                   return (
                     <li key={contact.name} className="border-b border-[#c7c9ba] py-4">
                       <h3 className="font-bold text-[#183456]">{contact.name}</h3>
                       <p className="mt-1 max-w-[52ch] text-sm leading-relaxed text-[#53616a]">
                         {contact.description}
                       </p>
-                      {filled ? (
-                        <p className="mt-3 inline-flex min-h-11 items-center border border-[#122744] bg-[#f5f4e9] px-4 text-sm font-extrabold text-[#183456]">
-                          {channel}
-                        </p>
+                      {activeChannels.length > 0 ? (
+                        <div className="mt-3 flex flex-wrap gap-2.5">
+                          {activeChannels.map((item) => {
+                            const Icon = item.label === "Email" ? Mail : Phone;
+                            const body = (
+                              <>
+                                <Icon aria-hidden="true" className="size-4 shrink-0 text-[#b34e3c]" />
+                                <span className="text-[0.68rem] font-extrabold tracking-[0.12em] uppercase text-[#53616a]">
+                                  {item.label}
+                                </span>
+                                <span className="font-extrabold tracking-tight text-[#183456]">
+                                  {item.value.trim()}
+                                </span>
+                              </>
+                            );
+                            return item.href ? (
+                              <a
+                                key={`${contact.name}-${item.label}`}
+                                href={item.href}
+                                className="inline-flex min-h-11 max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 border border-[#122744] bg-[#f5f4e9] px-3.5 py-2 text-sm transition-colors hover:bg-[#ede8d6] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#122744]"
+                              >
+                                {body}
+                              </a>
+                            ) : (
+                              <p
+                                key={`${contact.name}-${item.label}`}
+                                className="inline-flex min-h-11 max-w-full flex-wrap items-center gap-x-2 gap-y-0.5 border border-[#122744] bg-[#f5f4e9] px-3.5 py-2 text-sm"
+                              >
+                                {body}
+                              </p>
+                            );
+                          })}
+                        </div>
                       ) : (
                         <p className="mt-3 inline-flex min-h-11 items-center border border-dashed border-[#b4ae9a] px-4 text-sm text-[#5c6660]">
                           Kanal belum diisi oleh tim.
